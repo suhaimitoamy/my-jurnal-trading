@@ -53,25 +53,13 @@
     watch: 'Perlu dipantau'
   };
 
-  function githubBlob(path) {
-    return `${REPO_BASE}/blob/${BRANCH}/${path}`;
-  }
-
-  function rawUrl(path) {
-    return `${RAW_BASE}${path}`;
-  }
-
-  function readerUrl(path) {
-    return `./reader.html#view=${encodeURIComponent(path)}`;
-  }
-
-  function learnUrl(path) {
-    return `./learn.html#source=${encodeURIComponent(path)}`;
-  }
-
-  function screenshotFolder(day) {
-    return `docs/assets/images/screenshots/hari-${day}`;
-  }
+  function githubBlob(path) { return `${REPO_BASE}/blob/${BRANCH}/${path}`; }
+  function rawUrl(path) { return `${RAW_BASE}${path}`; }
+  function readerUrl(path) { return `./reader.html#view=${encodeURIComponent(path)}`; }
+  function learnUrl(path) { return `./learn.html#source=${encodeURIComponent(path)}`; }
+  function screenshotFolder(day) { return `docs/assets/images/screenshots/hari-${day}`; }
+  function materialsFolder() { return 'docs/assets/materials'; }
+  function githubUploadUrl(path) { return `${REPO_BASE}/new/${BRANCH}/${path}`; }
 
   function readCache(key) {
     try {
@@ -81,15 +69,11 @@
       if (!parsed || typeof parsed !== 'object') return null;
       if (!parsed.expiresAt || Date.now() > parsed.expiresAt) return null;
       return parsed.data;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
   }
 
   function writeCache(key, data, ttl = CACHE_TTL_MS) {
-    try {
-      localStorage.setItem(key, JSON.stringify({ data, expiresAt: Date.now() + ttl }));
-    } catch (_) {}
+    try { localStorage.setItem(key, JSON.stringify({ data, expiresAt: Date.now() + ttl })); } catch (_) {}
   }
 
   async function fetchJson(url) {
@@ -117,18 +101,11 @@
     const parsed = parseTradeFilename(name || '');
     const day = fallback?.day ?? parsed?.day ?? null;
     const date = fallback?.date ?? parsed?.date ?? '';
-    return {
-      day,
-      date,
-      title: fallback?.title || (day ? `Hari ${day}` : name.replace(/\.md$/i, '')),
-      path,
-      tags: fallback?.tags || []
-    };
+    return { day, date, title: fallback?.title || (day ? `Hari ${day}` : name.replace(/\.md$/i, '')), path, tags: fallback?.tags || [] };
   }
 
   function sortTradeItems(a, b) {
-    const dayA = Number(a.day || 0);
-    const dayB = Number(b.day || 0);
+    const dayA = Number(a.day || 0); const dayB = Number(b.day || 0);
     if (dayA !== dayB) return dayB - dayA;
     return String(b.date || '').localeCompare(String(a.date || ''));
   }
@@ -136,146 +113,81 @@
   async function loadTradeCatalog(options = {}) {
     const force = Boolean(options.force);
     const cacheKey = 'my-jurnal-trading:catalog:v2';
-    if (!force) {
-      const cached = readCache(cacheKey);
-      if (cached) return cached;
-    }
-
+    if (!force) { const cached = readCache(cacheKey); if (cached) return cached; }
     try {
       const payload = await fetchJson(`${API_BASE}/contents/trades?ref=${BRANCH}`);
-      const items = (Array.isArray(payload) ? payload : [])
-        .filter(item => item.type === 'file' && /\.md$/i.test(item.name) && !/final-status/i.test(item.name))
-        .map(item => normalizeTradeEntry(item))
-        .sort(sortTradeItems);
-      writeCache(cacheKey, items);
-      return items;
-    } catch (_) {
-      return FALLBACK_JOURNALS.slice().sort(sortTradeItems);
-    }
+      const items = (Array.isArray(payload) ? payload : []).filter(item => item.type === 'file' && /\.md$/i.test(item.name) && !/final-status/i.test(item.name)).map(item => normalizeTradeEntry(item)).sort(sortTradeItems);
+      writeCache(cacheKey, items); return items;
+    } catch (_) { return FALLBACK_JOURNALS.slice().sort(sortTradeItems); }
   }
 
   async function fetchTradeMarkdown(path, options = {}) {
-    const force = Boolean(options.force);
-    const cacheKey = `my-jurnal-trading:markdown:${path}`;
-    if (!force) {
-      const cached = readCache(cacheKey);
-      if (cached) return cached;
-    }
-    const markdown = await fetchText(rawUrl(path));
-    writeCache(cacheKey, markdown);
-    return markdown;
+    const force = Boolean(options.force); const cacheKey = `my-jurnal-trading:markdown:${path}`;
+    if (!force) { const cached = readCache(cacheKey); if (cached) return cached; }
+    const markdown = await fetchText(rawUrl(path)); writeCache(cacheKey, markdown); return markdown;
   }
 
   async function loadJournalScreenshots(journal, options = {}) {
-    const day = Number(journal?.day || 0);
-    if (!day) return { folderPath: '', images: [] };
-    const force = Boolean(options.force);
-    const folderPath = screenshotFolder(day);
-    const cacheKey = `my-jurnal-trading:screenshots:${folderPath}`;
-    if (!force) {
-      const cached = readCache(cacheKey);
-      if (cached) return cached;
-    }
-
+    const day = Number(journal?.day || 0); if (!day) return { folderPath: '', images: [] };
+    const force = Boolean(options.force); const folderPath = screenshotFolder(day); const cacheKey = `my-jurnal-trading:screenshots:${folderPath}`;
+    if (!force) { const cached = readCache(cacheKey); if (cached) return cached; }
     try {
       const payload = await fetchJson(`${API_BASE}/contents/${folderPath}?ref=${BRANCH}`);
-      const images = (Array.isArray(payload) ? payload : [])
-        .filter(item => item.type === 'file' && /\.(png|jpe?g|webp|gif)$/i.test(item.name))
-        .map(item => ({
-          name: item.name,
-          path: item.path,
-          rawUrl: item.download_url || rawUrl(item.path),
-          githubUrl: item.html_url || githubBlob(item.path)
-        }));
-      const result = { folderPath, images };
-      writeCache(cacheKey, result);
-      return result;
-    } catch (_) {
-      const result = { folderPath, images: [] };
-      writeCache(cacheKey, result, 1000 * 60 * 30);
-      return result;
-    }
+      const images = (Array.isArray(payload) ? payload : []).filter(item => item.type === 'file' && /\.(png|jpe?g|webp|gif)$/i.test(item.name)).map(item => ({ name: item.name, path: item.path, rawUrl: item.download_url || rawUrl(item.path), githubUrl: item.html_url || githubBlob(item.path) }));
+      const result = { folderPath, images }; writeCache(cacheKey, result); return result;
+    } catch (_) { const result = { folderPath, images: [] }; writeCache(cacheKey, result, 1000 * 60 * 30); return result; }
+  }
+
+  async function loadPdfMaterials(options = {}) {
+    const force = Boolean(options.force); const folderPath = materialsFolder(); const cacheKey = 'my-jurnal-trading:pdf-materials:v1';
+    if (!force) { const cached = readCache(cacheKey); if (cached) return cached; }
+    try {
+      const payload = await fetchJson(`${API_BASE}/contents/${folderPath}?ref=${BRANCH}`);
+      const files = (Array.isArray(payload) ? payload : []).filter(item => item.type === 'file' && /\.pdf$/i.test(item.name)).map(item => ({
+        name: item.name,
+        title: item.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '),
+        path: item.path,
+        rawUrl: item.download_url || rawUrl(item.path),
+        githubUrl: item.html_url || githubBlob(item.path)
+      }));
+      const result = { folderPath, files, uploadUrl: githubUploadUrl(folderPath) }; writeCache(cacheKey, result); return result;
+    } catch (_) { const result = { folderPath, files: [], uploadUrl: githubUploadUrl(folderPath) }; writeCache(cacheKey, result, 1000 * 60 * 30); return result; }
   }
 
   function parseFrontmatter(markdown) {
-    const trimmed = markdown.trimStart();
-    if (!trimmed.startsWith('---')) return {};
-    const endIndex = trimmed.indexOf('\n---', 3);
-    if (endIndex === -1) return {};
-    const block = trimmed.slice(3, endIndex).trim();
-    const data = {};
-    let currentKey = null;
-
+    const trimmed = markdown.trimStart(); if (!trimmed.startsWith('---')) return {};
+    const endIndex = trimmed.indexOf('\n---', 3); if (endIndex === -1) return {};
+    const block = trimmed.slice(3, endIndex).trim(); const data = {}; let currentKey = null;
     block.split('\n').forEach(rawLine => {
-      const line = rawLine.trimEnd();
-      if (!line.trim()) return;
+      const line = rawLine.trimEnd(); if (!line.trim()) return;
       const keyMatch = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
       if (keyMatch) {
-        currentKey = keyMatch[1];
-        const value = keyMatch[2].trim();
-        if (!value) {
-          data[currentKey] = [];
-          return;
-        }
-        if (value.startsWith('[') && value.endsWith(']')) {
-          data[currentKey] = value.slice(1, -1).split(',').map(item => item.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean);
-          return;
-        }
-        data[currentKey] = value.replace(/^['"]|['"]$/g, '');
-        return;
+        currentKey = keyMatch[1]; const value = keyMatch[2].trim();
+        if (!value) { data[currentKey] = []; return; }
+        if (value.startsWith('[') && value.endsWith(']')) { data[currentKey] = value.slice(1, -1).split(',').map(item => item.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean); return; }
+        data[currentKey] = value.replace(/^['"]|['"]$/g, ''); return;
       }
-      if (currentKey && line.trim().startsWith('- ')) {
-        if (!Array.isArray(data[currentKey])) data[currentKey] = [];
-        data[currentKey].push(line.trim().slice(2).trim());
-      }
+      if (currentKey && line.trim().startsWith('- ')) { if (!Array.isArray(data[currentKey])) data[currentKey] = []; data[currentKey].push(line.trim().slice(2).trim()); }
     });
-
     return data;
   }
 
   function extractSection(markdown, heading) {
     const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`^##\\s+${escaped}\\s*$([\\s\\S]*?)(?=^##\\s+|$)`, 'im');
-    const match = markdown.match(regex);
-    return match ? match[1].trim() : '';
+    const match = markdown.match(regex); return match ? match[1].trim() : '';
   }
-
-  function sectionByNames(markdown, names) {
-    for (const name of names) {
-      const section = extractSection(markdown, name);
-      if (section) return section;
-    }
-    return '';
-  }
-
-  function extractBullets(section) {
-    return (section || '')
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.startsWith('- '))
-      .map(line => line.slice(2).trim())
-      .filter(Boolean);
-  }
-
-  function cleanSentence(text) {
-    return text.replace(/\s+/g, ' ').trim();
-  }
-
+  function sectionByNames(markdown, names) { for (const name of names) { const section = extractSection(markdown, name); if (section) return section; } return ''; }
+  function extractBullets(section) { return (section || '').split('\n').map(line => line.trim()).filter(line => line.startsWith('- ')).map(line => line.slice(2).trim()).filter(Boolean); }
+  function cleanSentence(text) { return text.replace(/\s+/g, ' ').trim(); }
   function firstMeaningfulSentences(section, limit = 3) {
-    const normalized = (section || '')
-      .replace(/^###?\s+/gm, '')
-      .replace(/^- /gm, '')
-      .replace(/\n+/g, ' ');
+    const normalized = (section || '').replace(/^###?\s+/gm, '').replace(/^- /gm, '').replace(/\n+/g, ' ');
     const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [];
-    return sentences
-      .map(cleanSentence)
-      .filter(sentence => sentence.length > 22)
-      .slice(0, limit);
+    return sentences.map(cleanSentence).filter(sentence => sentence.length > 22).slice(0, limit);
   }
 
   function normalizeTag(tag) {
-    const value = String(tag || '').toLowerCase().trim();
-    if (!value) return '';
+    const value = String(tag || '').toLowerCase().trim(); if (!value) return '';
     if (value.includes('psychology') || value.includes('fomo') || value.includes('emosi') || value.includes('revenge') || value.includes('panic') || value.includes('mental') || value.includes('overconfidence') || value.includes('overtrade')) return 'psychology';
     if (value.includes('risk') || value.includes('lot') || value.includes('sl') || value.includes('stop loss') || value.includes('tp') || value.includes('mc') || value.includes('martingale') || value.includes('drawdown')) return 'risk-management';
     if (value.includes('entry') || value.includes('execution') || value.includes('breakout') || value.includes('retest') || value.includes('trigger') || value.includes('sell limit') || value.includes('buy limit')) return 'execution';
@@ -286,31 +198,14 @@
   }
 
   function inferTagsFromText(text) {
-    const source = String(text || '').toLowerCase();
-    const tags = new Set();
-    ['psychology', 'risk-management', 'execution', 'market-structure', 'discipline', 'external-signal'].forEach(tag => {
-      if (normalizeTag(source).includes(tag)) tags.add(tag);
-    });
-    [
-      ['psychology', ['fomo', 'emosi', 'revenge', 'panic', 'mental', 'overtrade', 'overconfidence']],
-      ['risk-management', ['risk', 'lot', 'stop loss', 'sl', 'tp cepat', 'martingale', 'mc']],
-      ['execution', ['entry', 'breakout', 'retest', 'sell limit', 'buy limit', 'trigger']],
-      ['market-structure', ['structure', 'trend', 'bearish', 'bullish', 'support', 'resistance', 'pullback', 'sweep', 'order flow']],
-      ['discipline', ['disiplin', 'discipline', 'rule', 'aturan']],
-      ['external-signal', ['sinyal', 'signal', 'jimmy', 'uwi', 'zio', 'tiktok']]
-    ].forEach(([tag, keywords]) => {
-      if (keywords.some(keyword => source.includes(keyword))) tags.add(tag);
-    });
+    const source = String(text || '').toLowerCase(); const tags = new Set();
+    ['psychology', 'risk-management', 'execution', 'market-structure', 'discipline', 'external-signal'].forEach(tag => { if (normalizeTag(source).includes(tag)) tags.add(tag); });
+    [['psychology', ['fomo','emosi','revenge','panic','mental','overtrade','overconfidence']],['risk-management',['risk','lot','stop loss','sl','tp cepat','martingale','mc']],['execution',['entry','breakout','retest','sell limit','buy limit','trigger']],['market-structure',['structure','trend','bearish','bullish','support','resistance','pullback','sweep','order flow']],['discipline',['disiplin','discipline','rule','aturan']],['external-signal',['sinyal','signal','jimmy','uwi','zio','tiktok']]].forEach(([tag, keywords]) => { if (keywords.some(keyword => source.includes(keyword))) tags.add(tag); });
     return Array.from(tags);
   }
 
-  function formatCategoryLabel(tag) {
-    return CATEGORY_LABELS[tag] || String(tag || 'Review').replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
-  }
-
-  function formatPriorityLabel(tag) {
-    return PRIORITY_LABELS[tag] || tag;
-  }
+  function formatCategoryLabel(tag) { return CATEGORY_LABELS[tag] || String(tag || 'Review').replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()); }
+  function formatPriorityLabel(tag) { return PRIORITY_LABELS[tag] || tag; }
 
   function deriveTopic(item, tags, takeaways) {
     if (takeaways[0]) return takeaways[0].slice(0, 88);
@@ -325,12 +220,10 @@
   }
 
   function derivePriorities(tags, summary, takeaways) {
-    const text = `${summary} ${(takeaways || []).join(' ')}`.toLowerCase();
-    const priorities = [];
-    const hasNegative = ['salah', 'loss', 'stop loss', 'martingale', 'mc', 'emosi', 'fomo', 'asal', 'tidak disiplin', 'ikut sinyal', 'panic', 'overtrade', 'no sl', 'tanpa'].some(keyword => text.includes(keyword));
-    const hasRepeated = ['masih', 'lagi', 'berulang', 'kembali', 'belum stabil', 'masih belum', 'masih mudah'].some(keyword => text.includes(keyword));
-    const hasImproved = ['lebih baik', 'membaik', 'sesuai rencana', 'patuh', 'disiplin', 'no trade', 'menunggu', 'valid'].some(keyword => text.includes(keyword));
-
+    const text = `${summary} ${(takeaways || []).join(' ')}`.toLowerCase(); const priorities = [];
+    const hasNegative = ['salah','loss','stop loss','martingale','mc','emosi','fomo','asal','tidak disiplin','ikut sinyal','panic','overtrade','no sl','tanpa'].some(keyword => text.includes(keyword));
+    const hasRepeated = ['masih','lagi','berulang','kembali','belum stabil','masih belum','masih mudah'].some(keyword => text.includes(keyword));
+    const hasImproved = ['lebih baik','membaik','sesuai rencana','patuh','disiplin','no trade','menunggu','valid'].some(keyword => text.includes(keyword));
     if (hasNegative || tags.includes('risk-management') || tags.includes('external-signal')) priorities.push('urgent');
     if (hasRepeated || ((tags.includes('psychology') || tags.includes('discipline')) && text.includes('masih'))) priorities.push('repeat');
     if (hasImproved && !hasNegative) priorities.push('improved');
@@ -345,153 +238,39 @@
     const summarySection = sectionByNames(markdown, ['Ringkasan Materi', 'Kesimpulan', 'Ringkasan Hari Ini', 'Evaluasi Emosi dan Kesalahan']);
     const summary = firstMeaningfulSentences(summarySection, 2).join(' ');
     const inferredTags = inferTagsFromText(`${markdown}\n${(item.tags || []).join(' ')}`);
-    const tags = Array.from(new Set([
-      ...((Array.isArray(frontmatter.tags) ? frontmatter.tags : []).map(normalizeTag).filter(Boolean)),
-      ...explicitTags,
-      ...((item.tags || []).map(normalizeTag).filter(Boolean)),
-      ...inferredTags
-    ])).filter(Boolean);
-    const takeaways = explicitTakeaways.length
-      ? explicitTakeaways.slice(0, 5)
-      : [
-          ...firstMeaningfulSentences(sectionByNames(markdown, ['Catatan Penting']), 3),
-          ...firstMeaningfulSentences(sectionByNames(markdown, ['Pembelajaran Hari Ini']), 2)
-        ].filter(Boolean).slice(0, 5);
-    const category = tags[0] || 'review';
-    const priorities = derivePriorities(tags, summary || '', takeaways || []);
-    return {
-      ...item,
-      tags,
-      topic: frontmatter.learning_topic || frontmatter.topic || deriveTopic(item, tags, takeaways),
-      summary: summary || 'Pelajaran diambil otomatis dari isi jurnal ini.',
-      takeaways: takeaways.length ? takeaways : ['Buka jurnal sumber untuk melihat detail pembelajaran lengkap.'],
-      category,
-      categoryLabel: formatCategoryLabel(category),
-      priorities,
-      priorityLabels: priorities.map(formatPriorityLabel),
-      readerUrl: readerUrl(item.path),
-      learnUrl: learnUrl(item.path),
-      githubUrl: githubBlob(item.path)
-    };
+    const tags = Array.from(new Set([ ...((Array.isArray(frontmatter.tags) ? frontmatter.tags : []).map(normalizeTag).filter(Boolean)), ...explicitTags, ...((item.tags || []).map(normalizeTag).filter(Boolean)), ...inferredTags ])).filter(Boolean);
+    const takeaways = explicitTakeaways.length ? explicitTakeaways.slice(0, 5) : [ ...firstMeaningfulSentences(sectionByNames(markdown, ['Catatan Penting']), 3), ...firstMeaningfulSentences(sectionByNames(markdown, ['Pembelajaran Hari Ini']), 2) ].filter(Boolean).slice(0, 5);
+    const category = tags[0] || 'review'; const priorities = derivePriorities(tags, summary || '', takeaways || []);
+    return { ...item, tags, topic: frontmatter.learning_topic || frontmatter.topic || deriveTopic(item, tags, takeaways), summary: summary || 'Pelajaran diambil otomatis dari isi jurnal ini.', takeaways: takeaways.length ? takeaways : ['Buka jurnal sumber untuk melihat detail pembelajaran lengkap.'], category, categoryLabel: formatCategoryLabel(category), priorities, priorityLabels: priorities.map(formatPriorityLabel), readerUrl: readerUrl(item.path), learnUrl: learnUrl(item.path), githubUrl: githubBlob(item.path) };
   }
 
   async function loadLearningItems(options = {}) {
-    const force = Boolean(options.force);
-    const cacheKey = 'my-jurnal-trading:learning:v3';
-    if (!force) {
-      const cached = readCache(cacheKey);
-      if (cached) return cached;
-    }
-
-    const catalog = await loadTradeCatalog({ force });
-    const items = [];
+    const force = Boolean(options.force); const cacheKey = 'my-jurnal-trading:learning:v3';
+    if (!force) { const cached = readCache(cacheKey); if (cached) return cached; }
+    const catalog = await loadTradeCatalog({ force }); const items = [];
     for (const item of catalog) {
-      try {
-        const markdown = await fetchTradeMarkdown(item.path, { force });
-        items.push(buildLearningItem(item, markdown));
-      } catch (_) {
-        items.push({
-          ...item,
-          tags: item.tags || [],
-          topic: `Pelajaran dari ${item.title}`,
-          summary: 'Jurnal ada di repo, tetapi detail pelajaran belum berhasil dimuat saat ini.',
-          takeaways: ['Buka jurnal sumber untuk membaca isi lengkapnya.'],
-          category: 'review',
-          categoryLabel: 'Review',
-          priorities: ['watch'],
-          priorityLabels: ['Perlu dipantau'],
-          readerUrl: readerUrl(item.path),
-          learnUrl: learnUrl(item.path),
-          githubUrl: githubBlob(item.path)
-        });
-      }
+      try { const markdown = await fetchTradeMarkdown(item.path, { force }); items.push(buildLearningItem(item, markdown)); }
+      catch (_) { items.push({ ...item, tags: item.tags || [], topic: `Pelajaran dari ${item.title}`, summary: 'Jurnal ada di repo, tetapi detail pelajaran belum berhasil dimuat saat ini.', takeaways: ['Buka jurnal sumber untuk membaca isi lengkapnya.'], category: 'review', categoryLabel: 'Review', priorities: ['watch'], priorityLabels: ['Perlu dipantau'], readerUrl: readerUrl(item.path), learnUrl: learnUrl(item.path), githubUrl: githubBlob(item.path) }); }
     }
-    items.sort(sortTradeItems);
-    writeCache(cacheKey, items);
-    return items;
+    items.sort(sortTradeItems); writeCache(cacheKey, items); return items;
   }
 
-  function escapeHtml(value) {
-    return String(value || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
+  function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#039;'); }
   function markdownToHtml(markdown) {
-    const lines = String(markdown || '').replace(/\r/g, '').split('\n');
-    let html = '';
-    let inList = false;
-    const closeList = () => {
-      if (inList) {
-        html += '</ul>';
-        inList = false;
-      }
-    };
-
+    const lines = String(markdown || '').replace(/\r/g, '').split('\n'); let html = ''; let inList = false;
+    const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
     lines.forEach(rawLine => {
       const line = rawLine.trim();
-      if (!line) {
-        closeList();
-        return;
-      }
-      if (line === '---') {
-        closeList();
-        html += '<hr>';
-        return;
-      }
-      if (line.startsWith('### ')) {
-        closeList();
-        html += `<h3>${escapeHtml(line.slice(4))}</h3>`;
-        return;
-      }
-      if (line.startsWith('## ')) {
-        closeList();
-        html += `<h2>${escapeHtml(line.slice(3))}</h2>`;
-        return;
-      }
-      if (line.startsWith('# ')) {
-        closeList();
-        html += `<h1>${escapeHtml(line.slice(2))}</h1>`;
-        return;
-      }
-      if (line.startsWith('- ')) {
-        if (!inList) {
-          html += '<ul>';
-          inList = true;
-        }
-        html += `<li>${escapeHtml(line.slice(2))}</li>`;
-        return;
-      }
-      closeList();
-      html += `<p>${escapeHtml(line)}</p>`;
+      if (!line) { closeList(); return; }
+      if (line === '---') { closeList(); html += '<hr>'; return; }
+      if (line.startsWith('### ')) { closeList(); html += `<h3>${escapeHtml(line.slice(4))}</h3>`; return; }
+      if (line.startsWith('## ')) { closeList(); html += `<h2>${escapeHtml(line.slice(3))}</h2>`; return; }
+      if (line.startsWith('# ')) { closeList(); html += `<h1>${escapeHtml(line.slice(2))}</h1>`; return; }
+      if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${escapeHtml(line.slice(2))}</li>`; return; }
+      closeList(); html += `<p>${escapeHtml(line)}</p>`;
     });
-
-    closeList();
-    return html;
+    closeList(); return html;
   }
 
-  window.TradingJournalSite = {
-    REPO_OWNER,
-    REPO_NAME,
-    REPO_BASE,
-    BRANCH,
-    githubBlob,
-    rawUrl,
-    readerUrl,
-    learnUrl,
-    screenshotFolder,
-    loadTradeCatalog,
-    fetchTradeMarkdown,
-    loadJournalScreenshots,
-    loadLearningItems,
-    markdownToHtml,
-    formatCategoryLabel,
-    formatPriorityLabel,
-    categoryLabels: CATEGORY_LABELS,
-    priorityLabels: PRIORITY_LABELS,
-    fallbackJournals: FALLBACK_JOURNALS
-  };
+  window.TradingJournalSite = { REPO_OWNER, REPO_NAME, REPO_BASE, BRANCH, githubBlob, rawUrl, readerUrl, learnUrl, screenshotFolder, materialsFolder, githubUploadUrl, loadTradeCatalog, fetchTradeMarkdown, loadJournalScreenshots, loadPdfMaterials, loadLearningItems, markdownToHtml, formatCategoryLabel, formatPriorityLabel, categoryLabels: CATEGORY_LABELS, priorityLabels: PRIORITY_LABELS, fallbackJournals: FALLBACK_JOURNALS };
 })();

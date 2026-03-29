@@ -27,8 +27,8 @@
       <div class="hero-inner">
         <section class="hero-card compact utility-first">
           <p class="eyebrow">Learning Hub</p>
-          <h1>Belajar dari jurnal dengan lebih cepat</h1>
-          <p class="page-subtitle">Cari topik, lihat prioritas, lalu buka jurnal sumber. Di mobile, halaman ini saya buat lebih compact supaya fungsi utama lebih cepat muncul.</p>
+          <h1>Belajar dari jurnal dan PDF</h1>
+          <p class="page-subtitle">Cari pelajaran dari jurnal, lihat prioritas, lalu simpan PDF materi ke folder yang dibaca otomatis oleh Learning Hub.</p>
           <div class="hero-actions">
             <a class="btn primary" href="./reader.html">Reader</a>
             <a class="btn" href="./#builder">Builder</a>
@@ -36,7 +36,7 @@
           <div class="compact-summary">
             <div class="compact-metric"><div class="label">Mode</div><div class="value">Learn</div></div>
             <div class="compact-metric"><div class="label">Prioritas</div><div class="value">4</div></div>
-            <div class="compact-metric"><div class="label">Sumber</div><div class="value">Jurnal</div></div>
+            <div class="compact-metric"><div class="label">Materi</div><div class="value">PDF</div></div>
           </div>
         </section>
       </div>
@@ -59,7 +59,23 @@
 
       <section class="stats-grid" id="stats"></section>
 
-      <details class="disclosure panel" open>
+      <section class="panel">
+        <div class="panel-head split">
+          <div>
+            <p class="section-kicker">PDF Materials</p>
+            <h2>Materi PDF</h2>
+            <p>Upload PDF ke folder materi repo, lalu Learning Hub akan membacanya otomatis.</p>
+          </div>
+          <div class="inline-actions">
+            <a id="pdf-upload-link" class="btn primary" href="#" target="_blank" rel="noreferrer">Upload PDF</a>
+            <a id="pdf-folder-link" class="btn" href="#" target="_blank" rel="noreferrer">Buka Folder</a>
+          </div>
+        </div>
+        <div id="pdf-status" class="helper">Memuat daftar PDF...</div>
+        <div id="pdf-grid" class="learning-grid"></div>
+      </section>
+
+      <details class="disclosure panel">
         <summary>Panduan tag & prioritas</summary>
         <div class="disclosure-body">
           <div class="legend-grid" style="margin-bottom:16px;">
@@ -82,16 +98,6 @@
               <span class="tag">market-structure</span>
               <h3>Struktur market</h3>
               <p>Untuk bias, trend, support, resistance, pullback, sweep, order flow, bullish, atau bearish.</p>
-            </article>
-            <article class="legend-item">
-              <span class="tag">discipline</span>
-              <h3>Disiplin sistem</h3>
-              <p>Untuk rule break, tidak sabar, tidak tunggu setup, atau keluar dari SOP pribadi.</p>
-            </article>
-            <article class="legend-item">
-              <span class="tag">external-signal</span>
-              <h3>Pengaruh luar</h3>
-              <p>Untuk ikut sinyal orang lain, TikTok, grup, mentor, atau opini luar yang mengganggu sistem.</p>
             </article>
           </div>
           <div class="legend-grid">
@@ -136,6 +142,10 @@
     const filtersEl = document.getElementById('filters');
     const statsEl = document.getElementById('stats');
     const gridEl = document.getElementById('learning-grid');
+    const pdfStatusEl = document.getElementById('pdf-status');
+    const pdfGridEl = document.getElementById('pdf-grid');
+    const pdfUploadLinkEl = document.getElementById('pdf-upload-link');
+    const pdfFolderLinkEl = document.getElementById('pdf-folder-link');
     let learningItems = [];
     let activeFilter = 'all';
 
@@ -219,6 +229,32 @@
       `).join('');
     }
 
+    function renderPdfMaterials(result) {
+      pdfUploadLinkEl.href = result.uploadUrl;
+      pdfFolderLinkEl.href = site.githubBlob(result.folderPath);
+      if (!result.files.length) {
+        pdfStatusEl.innerHTML = `Belum ada PDF. Upload ke <code>${result.folderPath}</code> lewat tombol di atas.`;
+        pdfGridEl.innerHTML = '';
+        return;
+      }
+      pdfStatusEl.innerHTML = `Folder aktif: <code>${result.folderPath}</code>`;
+      pdfGridEl.innerHTML = result.files.map(file => `
+        <article class="learning-card">
+          <div class="card-head">
+            <div>
+              <span class="tag reader">PDF</span>
+              <h3>${file.title}</h3>
+            </div>
+          </div>
+          <div class="source-line">${file.name}</div>
+          <div class="card-actions">
+            <a class="btn primary" href="${file.rawUrl}" target="_blank" rel="noreferrer">Buka PDF</a>
+            <a class="btn" href="${file.githubUrl}" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </article>
+      `).join('');
+    }
+
     function applyHashFocus() {
       if (!location.hash.startsWith('#source=')) return;
       const path = decodeURIComponent(location.hash.slice(8));
@@ -228,10 +264,15 @@
     }
 
     async function init() {
-      learningItems = await site.loadLearningItems();
+      const [items, pdfs] = await Promise.all([
+        site.loadLearningItems(),
+        site.loadPdfMaterials()
+      ]);
+      learningItems = items;
       buildFilters(learningItems);
       renderStats(learningItems);
       renderGrid(filteredItems());
+      renderPdfMaterials(pdfs);
       applyHashFocus();
     }
 
