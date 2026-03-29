@@ -6,6 +6,22 @@ Template ini dioptimalkan untuk:
 - review pribadi
 - ekstraksi pelajaran semi-otomatis
 
+## Standar Tag Resmi
+Gunakan tag dari daftar ini supaya Learning Hub lebih konsisten:
+- psychology
+- risk-management
+- execution
+- market-structure
+- discipline
+- external-signal
+- review
+
+Contoh kombinasi yang bagus:
+- psychology + discipline
+- risk-management + execution
+- market-structure + execution
+- external-signal + psychology
+
 ---
 
 # Trade Journal - Hari XX
