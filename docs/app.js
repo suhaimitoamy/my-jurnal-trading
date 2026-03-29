@@ -13,6 +13,7 @@ const quickLinks = [
   { title: 'Non-Negotiable Rules', path: 'playbook/non-negotiable-rules.md', desc: 'Larangan keras yang tidak boleh dilanggar.' },
   { title: 'Execution Checklist', path: 'playbook/execution-checklist.md', desc: 'Checklist eksekusi sebelum entry.' },
   { title: 'Daily Review Template', path: 'playbook/daily-review-template.md', desc: 'Template evaluasi sesudah sesi.' },
+  { title: 'Journal Template V2', path: 'templates/journal-v2-template.md', desc: 'Template baru yang dioptimalkan untuk Reader dan Learning Hub.' },
   { title: 'Master Diagnosis 1-35', path: 'weekly-reviews/master-diagnosis-day-1-to-35.md', desc: 'Diagnosis besar dari seluruh fase awal.' },
   { title: 'Final Status 1-35', path: 'trades/final-status-day-1-to-35.md', desc: 'Status akhir: masuk repo vs skip.' }
 ];
@@ -55,7 +56,7 @@ function renderStats() {
   const cards = [
     { label: 'Jurnal masuk repo', value: doneDays.length, hint: 'Siap dibuka di Reader.' },
     { label: 'Hari di-skip', value: skipDays.length, hint: 'Tetap tercatat untuk evaluasi batch.' },
-    { label: 'Quick links', value: quickLinks.length, hint: 'Rule penting dalam satu tempat.' },
+    { label: 'Quick links', value: quickLinks.length, hint: 'Rule, template, dan file penting dalam satu tempat.' },
     { label: 'Learning Hub', value: 'Ready', hint: 'Jurnal bisa jadi materi pembelajaran.' }
   ];
 
@@ -145,7 +146,7 @@ function buildMarkdown(formData) {
   const lessons = listToBullets(formData.lessons) || '-';
   const focus = listToBullets(formData.focus) || '-';
 
-  const md = `${title}\n\n## Informasi Umum\n- Tanggal: ${formData.date}\n- Hari ke: ${formData.day}\n- Instrumen: ${formData.instrument || 'XAUUSD'}\n- Hasil hari ini: ${formData.result || '-'}\n- Bias atau kondisi market: ${formData.bias || '-'}\n\n## Ringkasan Hari Ini\n${formData.summary || '-'}\n\n## Kesalahan Utama\n${mistakes}\n\n## Pembelajaran Hari Ini\n${lessons}\n\n## Fokus Perbaikan\n${focus}\n\n## Tag Pembelajaran\n- psychology\n- risk-management\n\n## Pelajaran Inti\n- Tulis 2 sampai 4 pelajaran paling penting dari jurnal ini.\n- Learning Hub akan membaca bagian ini bila tersedia.\n`;
+  const md = `${title}\n\n## Informasi Umum\n- Tanggal: ${formData.date}\n- Hari ke: ${formData.day}\n- Instrumen: ${formData.instrument || 'XAUUSD'}\n- Hasil hari ini: ${formData.result || '-'}\n- Bias atau kondisi market: ${formData.bias || '-'}\n- Sesi trading: London / New York / Asia\n\n## Ringkasan Hari Ini\n${formData.summary || '-'}\n\n## Konteks Market\n- Struktur HTF: -\n- Struktur intraday: -\n- Area penting: -\n- Skenario utama: -\n- Skenario batal: -\n\n## Entry yang Diambil\n- Entry 1: -\n- Alasan entry: -\n- Execution quality: -\n- Hasil: -\n\n## Kesalahan Utama\n${mistakes}\n\n## Pembelajaran Hari Ini\n${lessons}\n\n## Fokus Perbaikan\n${focus}\n\n## Tag Pembelajaran\n- psychology\n- risk-management\n- execution\n\n## Pelajaran Inti\n- Tulis 2 sampai 5 pelajaran paling penting dari jurnal ini.\n- Gunakan kalimat singkat, jelas, dan praktis.\n\n## Ringkasan Materi\nTulis 2 sampai 4 kalimat inti agar Learning Hub bisa menampilkan materi dengan lebih rapi.\n\n## Checklist Besok\n- [ ] Tetapkan bias sebelum entry\n- [ ] Tunggu validasi struktur\n- [ ] Risk tetap kecil\n- [ ] Hindari entry impulsif\n`;
 
   return { filename: `trades/${filename}`, markdown: md };
 }
