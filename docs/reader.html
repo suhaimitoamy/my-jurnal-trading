@@ -28,7 +28,7 @@
         <section class="hero-card compact utility-first">
           <p class="eyebrow">Reader</p>
           <h1>Baca jurnal dengan cepat</h1>
-          <p class="page-subtitle">Klik hari, baca isi, lihat screenshot trade, lalu kembali ke daftar. Reader sekarang juga bisa menampilkan galeri gambar per jurnal.</p>
+          <p class="page-subtitle">Klik hari, baca isi, lihat screenshot trade, lalu kembali ke daftar. Screenshot sekarang juga bisa di-upload lewat tombol folder harian yang sesuai.</p>
           <div class="hero-actions">
             <a class="btn primary" href="./learn.html">Learning Hub</a>
             <a class="btn" href="./#builder">Builder</a>
@@ -71,11 +71,15 @@
           </div>
           <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
           <section class="gallery-section">
-            <div class="panel-head">
+            <div class="panel-head split">
               <div>
                 <p class="section-kicker">Screenshots</p>
                 <h3>Galeri trade</h3>
                 <p class="gallery-note">Taruh gambar di <code>docs/assets/images/screenshots/hari-xx/</code> agar otomatis muncul di sini.</p>
+              </div>
+              <div class="inline-actions">
+                <a id="gallery-upload-link" class="btn subtle" href="#" target="_blank" rel="noreferrer">Upload Screenshot</a>
+                <a id="gallery-folder-link" class="btn" href="#" target="_blank" rel="noreferrer">Buka Folder</a>
               </div>
             </div>
             <div id="gallery-status" class="gallery-note">Belum ada screenshot yang dimuat.</div>
@@ -103,6 +107,8 @@
     const learnEl = document.getElementById('open-learn');
     const galleryStatusEl = document.getElementById('gallery-status');
     const galleryGridEl = document.getElementById('gallery-grid');
+    const galleryUploadLinkEl = document.getElementById('gallery-upload-link');
+    const galleryFolderLinkEl = document.getElementById('gallery-folder-link');
     const backBtn = document.getElementById('back-to-list');
     const listTab = document.getElementById('tab-list');
     const viewerTab = document.getElementById('tab-viewer');
@@ -135,13 +141,16 @@
     }
 
     function renderGallery(result) {
+      const folder = result?.folderPath || 'docs/assets/images/screenshots';
       const images = result?.images || [];
+      galleryUploadLinkEl.href = site.githubUploadUrl(folder);
+      galleryFolderLinkEl.href = site.githubBlob(folder);
       if (!images.length) {
         galleryStatusEl.textContent = 'Belum ada screenshot untuk jurnal ini.';
         galleryGridEl.innerHTML = '';
         return;
       }
-      galleryStatusEl.innerHTML = `Folder aktif: <code>${result.folderPath}</code>`;
+      galleryStatusEl.innerHTML = `Folder aktif: <code>${folder}</code>`;
       galleryGridEl.innerHTML = images.map(image => `
         <article class="gallery-card">
           <a href="${image.rawUrl}" target="_blank" rel="noreferrer">

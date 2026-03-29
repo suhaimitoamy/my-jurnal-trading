@@ -51,6 +51,14 @@ function githubBlob(path) {
   return `${repoBase}/blob/main/${path}`;
 }
 
+function githubUploadPath(path) {
+  return `${repoBase}/new/main/${path}`;
+}
+
+function screenshotFolder(day) {
+  return `docs/assets/images/screenshots/hari-${day}`;
+}
+
 function renderStats() {
   const root = document.getElementById('dashboard-stats');
   const cards = [
@@ -67,11 +75,6 @@ function renderStats() {
       <div class="hint">${card.hint}</div>
     </div>
   `).join('');
-}
-
-function renderStatus() {
-  document.getElementById('done-list').innerHTML = doneDays.map(day => `<li>Hari ${day}</li>`).join('');
-  document.getElementById('skip-list').innerHTML = skipDays.map(day => `<li>Hari ${day}</li>`).join('');
 }
 
 function renderQuickLinks() {
@@ -148,13 +151,15 @@ function buildMarkdown(formData) {
 
   const md = `${title}\n\n## Informasi Umum\n- Tanggal: ${formData.date}\n- Hari ke: ${formData.day}\n- Instrumen: ${formData.instrument || 'XAUUSD'}\n- Hasil hari ini: ${formData.result || '-'}\n- Bias atau kondisi market: ${formData.bias || '-'}\n- Sesi trading: London / New York / Asia\n\n## Ringkasan Hari Ini\n${formData.summary || '-'}\n\n## Konteks Market\n- Struktur HTF: -\n- Struktur intraday: -\n- Area penting: -\n- Skenario utama: -\n- Skenario batal: -\n\n## Entry yang Diambil\n- Entry 1: -\n- Alasan entry: -\n- Execution quality: -\n- Hasil: -\n\n## Kesalahan Utama\n${mistakes}\n\n## Pembelajaran Hari Ini\n${lessons}\n\n## Fokus Perbaikan\n${focus}\n\n## Tag Pembelajaran\n- psychology\n- risk-management\n- execution\n\n## Standar Tag Resmi\n- psychology\n- risk-management\n- execution\n- market-structure\n- discipline\n- external-signal\n- review\n\n## Pelajaran Inti\n- Tulis 2 sampai 5 pelajaran paling penting dari jurnal ini.\n- Gunakan kalimat singkat, jelas, dan praktis.\n\n## Ringkasan Materi\nTulis 2 sampai 4 kalimat inti agar Learning Hub bisa menampilkan materi dengan lebih rapi.\n\n## Checklist Besok\n- [ ] Tetapkan bias sebelum entry\n- [ ] Tunggu validasi struktur\n- [ ] Risk tetap kecil\n- [ ] Hindari entry impulsif\n`;
 
-  return { filename: `trades/${filename}`, markdown: md };
+  return { filename: `trades/${filename}`, markdown: md, screenshotFolder: screenshotFolder(formData.day) };
 }
 
 function setupBuilder() {
   const form = document.getElementById('journal-form');
   const output = document.getElementById('markdown-output');
   const fileLabel = document.getElementById('suggested-filename');
+  const screenshotFolderLabel = document.getElementById('screenshot-folder');
+  const uploadLink = document.getElementById('upload-screenshot-link');
   const storageKey = 'my-jurnal-trading-builder';
 
   const fieldIds = [
@@ -162,10 +167,29 @@ function setupBuilder() {
     'entry-summary', 'entry-mistakes', 'entry-lessons', 'entry-focus'
   ];
 
+  function resetScreenshotState() {
+    screenshotFolderLabel.textContent = '-';
+    uploadLink.href = '#';
+    uploadLink.setAttribute('aria-disabled', 'true');
+  }
+
+  function updateScreenshotTarget(dayValue) {
+    const day = String(dayValue || '').trim();
+    if (!day) {
+      resetScreenshotState();
+      return;
+    }
+    const folder = screenshotFolder(day);
+    screenshotFolderLabel.textContent = folder;
+    uploadLink.href = githubUploadPath(folder);
+    uploadLink.removeAttribute('aria-disabled');
+  }
+
   function saveDraft() {
     const draft = {};
     fieldIds.forEach(id => { draft[id] = document.getElementById(id).value; });
     localStorage.setItem(storageKey, JSON.stringify(draft));
+    updateScreenshotTarget(document.getElementById('entry-day').value);
   }
 
   function loadDraft() {
@@ -180,6 +204,7 @@ function setupBuilder() {
   }
 
   loadDraft();
+  updateScreenshotTarget(document.getElementById('entry-day').value);
   fieldIds.forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
 
   form.addEventListener('submit', (e) => {
@@ -198,6 +223,9 @@ function setupBuilder() {
     const built = buildMarkdown(data);
     output.value = built.markdown;
     fileLabel.textContent = built.filename;
+    screenshotFolderLabel.textContent = built.screenshotFolder;
+    uploadLink.href = githubUploadPath(built.screenshotFolder);
+    uploadLink.removeAttribute('aria-disabled');
   });
 
   document.getElementById('clear-form').addEventListener('click', () => {
@@ -205,6 +233,7 @@ function setupBuilder() {
     output.value = '';
     fileLabel.textContent = '-';
     localStorage.removeItem(storageKey);
+    resetScreenshotState();
   });
 
   document.getElementById('copy-markdown').addEventListener('click', async () => {
@@ -229,7 +258,6 @@ function setupBuilder() {
 function init() {
   document.getElementById('repo-link').href = repoBase;
   renderStats();
-  renderStatus();
   renderQuickLinks();
   renderJournals();
   setupSearch();
