@@ -130,7 +130,7 @@ h1 {
 
 .feature-spotlight {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
 }
 
@@ -414,7 +414,6 @@ code {
 .tag.reader { color: var(--primary-2); }
 
 @media (max-width: 900px) {
-  .feature-spotlight,
   .builder-layout {
     grid-template-columns: 1fr;
   }

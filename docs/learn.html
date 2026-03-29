@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Hub - My Jurnal Trading</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
+    .hero{padding:36px 0 18px}
+    .title{margin:0;font-size:clamp(28px,5vw,46px)}
+    .sub{color:var(--muted);line-height:1.6;max-width:780px}
+    .nav-actions,.filter-row,.card-actions,.stats-row{display:flex;flex-wrap:wrap;gap:12px}
+    .layout{display:grid;grid-template-columns:1fr;gap:18px}
+    .controls{display:grid;gap:14px}
+    .stats-grid{margin-top:0}
+    .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .learning-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+    .learning-card:hover{border-color:rgba(124,156,255,.45)}
+    .card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .card-head h3{margin:0;font-size:20px;line-height:1.35}
+    .source-line{color:var(--muted);font-size:14px}
+    .takeaway-list{margin:0;padding-left:18px;color:var(--text);line-height:1.65}
+    .filter-chip{border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);padding:10px 14px;border-radius:999px;cursor:pointer;font:inherit;font-weight:700}
+    .filter-chip.active{background:rgba(124,156,255,.16);border-color:rgba(124,156,255,.34);color:var(--primary-2)}
+    .helper{color:var(--muted);font-size:14px;line-height:1.6}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="eyebrow">Learning Hub</p>
+      <h1 class="title">Materi belajar dari jurnal trading</h1>
+      <p class="sub">Halaman ini membaca jurnal dari repo lalu mencoba mengubahnya menjadi materi pembelajaran. Jurnal lama tetap bisa masuk. Jurnal baru akan lebih bagus hasilnya kalau kamu tambahkan <code>## Tag Pembelajaran</code> dan <code>## Pelajaran Inti</code>.</p>
+      <div class="nav-actions">
+        <a class="btn" href="./">Kembali ke dashboard</a>
+        <a class="btn" href="./reader.html">Buka Reader</a>
+      </div>
+    </section>
+
+    <section class="panel controls">
+      <div class="panel-head split">
+        <div>
+          <p class="section-kicker">Filter</p>
+          <h2>Temukan pelajaran yang relevan</h2>
+          <p>Cari materi dari jurnal, filter per topik, lalu lompat ke jurnal sumber.</p>
+        </div>
+        <div class="search-wrap">
+          <input id="search" class="search" type="search" placeholder="Cari topik, hari, tag, atau pelajaran..." />
+        </div>
+      </div>
+      <div id="filters" class="filter-row"></div>
+      <p class="helper">Semi-otomatis artinya website membaca file di folder <code>trades/</code>. Kalau jurnal baru punya tag dan pelajaran inti, Learning Hub akan menangkapnya lebih akurat.</p>
+    </section>
+
+    <section class="stats-grid" id="stats"></section>
+
+    <section class="layout">
+      <div id="learning-grid" class="learning-grid">
+        <div class="learning-card"><p class="loading">Memuat materi pembelajaran...</p></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./site-utils.js"></script>
+  <script>
+    const site = window.TradingJournalSite;
+    const searchEl = document.getElementById('search');
+    const filtersEl = document.getElementById('filters');
+    const statsEl = document.getElementById('stats');
+    const gridEl = document.getElementById('learning-grid');
+    let learningItems = [];
+    let activeFilter = 'all';
+
+    function buildFilters(items) {
+      const counts = items.reduce((acc, item) => {
+        acc[item.category] = (acc[item.category] || 0) + 1;
+        return acc;
+      }, {});
+      const filters = [{ key: 'all', label: 'Semua', count: items.length }].concat(
+        Object.entries(counts).map(([key, count]) => ({ key, label: site.formatCategoryLabel(key), count }))
+      );
+      filtersEl.innerHTML = filters.map(filter => `
+        <button class="filter-chip ${filter.key === activeFilter ? 'active' : ''}" data-filter="${filter.key}">
+          ${filter.label} (${filter.count})
+        </button>
+      `).join('');
+    }
+
+    function renderStats(items) {
+      const totalTakeaways = items.reduce((sum, item) => sum + (item.takeaways || []).length, 0);
+      const categories = new Set(items.map(item => item.category)).size;
+      const latest = items[0]?.day ? `Hari ${items[0].day}` : '-';
+      const cards = [
+        { label: 'Materi terbaca', value: items.length, hint: 'Diambil dari jurnal di repo.' },
+        { label: 'Topik aktif', value: categories, hint: 'Psychology, risk, execution, dan lain-lain.' },
+        { label: 'Takeaways', value: totalTakeaways, hint: 'Poin pelajaran yang berhasil diambil.' },
+        { label: 'Jurnal terbaru', value: latest, hint: 'Terbaca dari katalog repo.' }
+      ];
+      statsEl.innerHTML = cards.map(card => `
+        <div class="stat-card">
+          <div class="label">${card.label}</div>
+          <div class="value">${card.value}</div>
+          <div class="hint">${card.hint}</div>
+        </div>
+      `).join('');
+    }
+
+    function filteredItems() {
+      const query = searchEl.value.toLowerCase().trim();
+      return learningItems.filter(item => {
+        const matchesFilter = activeFilter === 'all' || item.category === activeFilter;
+        if (!matchesFilter) return false;
+        if (!query) return true;
+        return [item.topic, item.summary, item.categoryLabel, item.date, `hari ${item.day || ''}`, ...(item.tags || []), ...(item.takeaways || [])]
+          .join(' ')
+          .toLowerCase()
+          .includes(query);
+      });
+    }
+
+    function renderGrid(items) {
+      if (!items.length) {
+        gridEl.innerHTML = '<div class="learning-card"><p class="empty">Tidak ada materi yang cocok dengan filter saat ini.</p></div>';
+        return;
+      }
+      gridEl.innerHTML = items.map(item => `
+        <article class="learning-card" id="source-${encodeURIComponent(item.path)}">
+          <div class="card-head">
+            <div>
+              <span class="tag reader">${item.categoryLabel}</span>
+              <h3>${item.topic}</h3>
+            </div>
+            <span class="day-badge">Hari ${item.day || '-'}</span>
+          </div>
+          <div class="source-line">${item.title} • ${item.date || '-'} • dari jurnal sumber</div>
+          <p class="helper">${item.summary}</p>
+          <ul class="takeaway-list">
+            ${(item.takeaways || []).map(point => `<li>${point}</li>`).join('')}
+          </ul>
+          <div class="tag-row">
+            ${(item.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+          <div class="card-actions">
+            <a class="btn primary" href="${item.readerUrl}">Baca jurnal sumber</a>
+            <a class="btn" href="${item.githubUrl}" target="_blank" rel="noreferrer">Buka di GitHub</a>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function applyHashFocus() {
+      if (!location.hash.startsWith('#source=')) return;
+      const path = decodeURIComponent(location.hash.slice(8));
+      const id = `source-${encodeURIComponent(path)}`;
+      const target = document.getElementById(id);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function init() {
+      learningItems = await site.loadLearningItems();
+      buildFilters(learningItems);
+      renderStats(learningItems);
+      renderGrid(filteredItems());
+      applyHashFocus();
+    }
+
+    filtersEl.addEventListener('click', event => {
+      const btn = event.target.closest('[data-filter]');
+      if (!btn) return;
+      activeFilter = btn.dataset.filter;
+      buildFilters(learningItems);
+      renderGrid(filteredItems());
+    });
+
+    searchEl.addEventListener('input', () => renderGrid(filteredItems()));
+    window.addEventListener('hashchange', applyHashFocus);
+
+    init();
+  </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Jurnal Trading Dashboard</title>
-  <meta name="description" content="Dashboard jurnal trading untuk navigasi cepat, membaca jurnal langsung, dan membuat draft markdown baru." />
+  <meta name="description" content="Dashboard jurnal trading untuk navigasi cepat, membaca jurnal langsung, dan belajar dari jurnal trading di Learning Hub." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -13,12 +13,13 @@
       <div class="hero-copy">
         <p class="eyebrow">My Jurnal Trading</p>
         <h1>Dashboard Trading Journal</h1>
-        <p class="subtitle">Base utama untuk navigasi, review cepat, dan bikin draft jurnal. Untuk baca isi jurnal langsung di website, gunakan Reader.</p>
+        <p class="subtitle">Base utama untuk navigasi, review cepat, bikin draft jurnal, baca jurnal langsung, dan mengubah jurnal menjadi materi pembelajaran di Learning Hub.</p>
       </div>
 
       <div class="hero-shell">
         <div class="hero-actions">
           <a class="btn primary" href="./reader.html">Buka Reader</a>
+          <a class="btn" href="./learn.html">Buka Learning Hub</a>
           <a class="btn" href="#journals">Lihat Daftar Jurnal</a>
           <a class="btn" href="#builder">Buat Draft Baru</a>
           <a class="btn ghost" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
@@ -34,6 +35,17 @@
             <p>Baca jurnal langsung di website tanpa bolak-balik ke GitHub. Cocok untuk review harian dari HP.</p>
             <div class="mode-actions">
               <a class="btn primary" href="./reader.html">Masuk Reader</a>
+            </div>
+          </article>
+
+          <article class="mode-card">
+            <div class="mode-head">
+              <span class="mode-kicker">Belajar</span>
+            </div>
+            <h2>Learning Hub</h2>
+            <p>Jurnal yang kamu upload bisa ikut tampil sebagai materi pembelajaran. Website mencoba membaca jurnal baru langsung dari repo.</p>
+            <div class="mode-actions">
+              <a class="btn" href="./learn.html">Buka Learning Hub</a>
             </div>
           </article>
 
@@ -92,7 +104,7 @@
         <div>
           <p class="section-kicker">Journal Directory</p>
           <h2>Daftar Jurnal</h2>
-          <p>Buka reader untuk baca di website, atau buka file asli di GitHub dari tiap kartu.</p>
+          <p>Buka reader untuk baca di website, lalu pakai Learning Hub untuk melihat pelajaran yang diekstrak dari jurnal.</p>
         </div>
         <div class="search-wrap">
           <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
@@ -100,6 +112,7 @@
       </div>
       <div class="section-actions">
         <a class="btn primary" href="./reader.html">Baca Semua via Reader</a>
+        <a class="btn" href="./learn.html">Belajar via Learning Hub</a>
       </div>
       <div id="journal-grid" class="journal-grid"></div>
     </section>
@@ -165,7 +178,7 @@
             <button type="button" class="btn primary" id="copy-markdown">Copy Markdown</button>
             <button type="button" class="btn" id="download-markdown">Download .md</button>
           </div>
-          <p class="note">Catatan: website statis ini membantu bikin draft, tapi untuk menyimpan permanen ke repo tetap perlu commit file ke GitHub.</p>
+          <p class="note">Catatan: untuk hasil paling bagus di Learning Hub, nanti kamu bisa tambahkan blok <code>## Tag Pembelajaran</code> dan <code>## Pelajaran Inti</code> di jurnal baru.</p>
         </div>
       </div>
     </section>
@@ -179,6 +192,7 @@
       </div>
       <ol class="howto">
         <li>Buka Reader untuk membaca jurnal langsung di website.</li>
+        <li>Buka Learning Hub untuk melihat materi pembelajaran yang diturunkan dari jurnal.</li>
         <li>Pakai Quick Access untuk buka rule, checklist, dan playbook penting.</li>
         <li>Gunakan Journal Builder setelah sesi selesai.</li>
         <li>Copy atau download markdown hasil draft, lalu simpan ke folder <code>trades/</code> di repo GitHub.</li>

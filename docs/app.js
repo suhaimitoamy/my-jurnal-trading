@@ -53,10 +53,10 @@ function githubBlob(path) {
 function renderStats() {
   const root = document.getElementById('dashboard-stats');
   const cards = [
-    { label: 'Jurnal masuk repo', value: doneDays.length, hint: 'Siap dibuka di reader atau GitHub.' },
+    { label: 'Jurnal masuk repo', value: doneDays.length, hint: 'Siap dibuka di Reader.' },
     { label: 'Hari di-skip', value: skipDays.length, hint: 'Tetap tercatat untuk evaluasi batch.' },
     { label: 'Quick links', value: quickLinks.length, hint: 'Rule penting dalam satu tempat.' },
-    { label: 'Mode baca utama', value: 'Reader', hint: 'Optimalkan review langsung dari HP.' }
+    { label: 'Learning Hub', value: 'Ready', hint: 'Jurnal bisa jadi materi pembelajaran.' }
   ];
 
   root.innerHTML = cards.map(card => `
@@ -103,6 +103,7 @@ function renderJournals(items = journals) {
         <p class="meta">${item.date}</p>
         <div class="tag-row">
           <span class="tag reader">Reader tersedia</span>
+          <span class="tag">Learning Hub</span>
           ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
       </a>
@@ -128,11 +129,6 @@ function setupSearch() {
   });
 }
 
-function formatDateParts(dateString) {
-  const [year, month, day] = dateString.split('-');
-  return { year, month, day };
-}
-
 function listToBullets(text) {
   return (text || '')
     .split('\n')
@@ -143,14 +139,13 @@ function listToBullets(text) {
 }
 
 function buildMarkdown(formData) {
-  formatDateParts(formData.date);
   const filename = `${formData.date}-hari-${formData.day}.md`;
   const title = `# Trade Journal - Hari ${formData.day}`;
   const mistakes = listToBullets(formData.mistakes) || '-';
   const lessons = listToBullets(formData.lessons) || '-';
   const focus = listToBullets(formData.focus) || '-';
 
-  const md = `${title}\n\n## Informasi Umum\n- Tanggal: ${formData.date}\n- Hari ke: ${formData.day}\n- Instrumen: ${formData.instrument || 'XAUUSD'}\n- Hasil hari ini: ${formData.result || '-'}\n- Bias atau kondisi market: ${formData.bias || '-'}\n\n## Ringkasan Hari Ini\n${formData.summary || '-'}\n\n## Kesalahan Utama\n${mistakes}\n\n## Pembelajaran Hari Ini\n${lessons}\n\n## Fokus Perbaikan\n${focus}\n`;
+  const md = `${title}\n\n## Informasi Umum\n- Tanggal: ${formData.date}\n- Hari ke: ${formData.day}\n- Instrumen: ${formData.instrument || 'XAUUSD'}\n- Hasil hari ini: ${formData.result || '-'}\n- Bias atau kondisi market: ${formData.bias || '-'}\n\n## Ringkasan Hari Ini\n${formData.summary || '-'}\n\n## Kesalahan Utama\n${mistakes}\n\n## Pembelajaran Hari Ini\n${lessons}\n\n## Fokus Perbaikan\n${focus}\n\n## Tag Pembelajaran\n- psychology\n- risk-management\n\n## Pelajaran Inti\n- Tulis 2 sampai 4 pelajaran paling penting dari jurnal ini.\n- Learning Hub akan membaca bagian ini bila tersedia.\n`;
 
   return { filename: `trades/${filename}`, markdown: md };
 }
