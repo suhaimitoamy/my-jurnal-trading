@@ -26,50 +26,20 @@
 
     <header class="hero">
       <div class="hero-inner">
-        <section class="hero-card">
-          <p class="eyebrow">Trading Operating System</p>
-          <h1>Dashboard yang rapi untuk baca, belajar, dan membangun jurnal</h1>
-          <p class="subtitle">Sekarang dashboard diarahkan sebagai home utama. Dari sini kamu bisa pindah ke Reader, Learning Hub, atau bikin draft jurnal baru dengan alur yang lebih bersih dan nyaman dipakai dari HP.</p>
+        <section class="hero-card utility-first">
+          <p class="eyebrow">Home</p>
+          <h1>Masuk cepat ke tool yang kamu butuhkan</h1>
+          <p class="subtitle">Dashboard sekarang dibuat lebih ringkas. Fokusnya: buka Reader, Learning Hub, atau Builder secepat mungkin.</p>
           <div class="hero-actions">
-            <a class="btn primary" href="./reader.html">Masuk Reader</a>
-            <a class="btn subtle" href="./learn.html">Buka Learning Hub</a>
-            <a class="btn" href="#builder">Buat Draft Baru</a>
-            <a class="btn ghost" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
+            <a class="btn primary" href="./reader.html">Reader</a>
+            <a class="btn subtle" href="./learn.html">Learning Hub</a>
+            <a class="btn" href="#builder">Builder</a>
           </div>
-        </section>
-
-        <section class="quick-overview" aria-label="Ringkasan mode utama">
-          <article class="mode-card featured">
-            <div class="mode-head">
-              <span class="mode-kicker">Primary</span>
-              <span class="mode-chip">Recommended</span>
-            </div>
-            <h3>Reader</h3>
-            <p>Baca jurnal langsung di website dengan fokus ke kenyamanan review harian.</p>
-            <div class="mode-actions">
-              <a class="btn primary" href="./reader.html">Buka Reader</a>
-            </div>
-          </article>
-          <article class="mode-card">
-            <div class="mode-head">
-              <span class="mode-kicker">Learning</span>
-            </div>
-            <h3>Learning Hub</h3>
-            <p>Ubah jurnal jadi materi pembelajaran dengan filter, prioritas, dan tag guide.</p>
-            <div class="mode-actions">
-              <a class="btn" href="./learn.html">Masuk Learning Hub</a>
-            </div>
-          </article>
-          <article class="mode-card">
-            <div class="mode-head">
-              <span class="mode-kicker">Builder</span>
-            </div>
-            <h3>Draft Journal V2</h3>
-            <p>Generate jurnal dengan struktur yang lebih siap untuk Reader dan Learning Hub.</p>
-            <div class="mode-actions">
-              <a class="btn" href="#builder">Buka Builder</a>
-            </div>
-          </article>
+          <div class="compact-summary">
+            <div class="compact-metric"><div class="label">Mode utama</div><div class="value">3</div></div>
+            <div class="compact-metric"><div class="label">Jurnal</div><div class="value">35</div></div>
+            <div class="compact-metric"><div class="label">Belajar</div><div class="value">Hub</div></div>
+          </div>
         </section>
       </div>
     </header>
@@ -77,55 +47,20 @@
     <main class="container">
       <section class="stats-grid" id="dashboard-stats"></section>
 
-      <section class="panel" id="playbook">
-        <div class="panel-head split">
-          <div>
-            <p class="section-kicker">Quick Access</p>
-            <h2>File penting dalam satu tempat</h2>
-            <p>Buka file inti tanpa bolak-balik cari manual di repo.</p>
-          </div>
-          <div class="inline-actions">
-            <a class="btn subtle" href="./reader.html">Ke Reader</a>
-            <a class="btn" href="./learn.html">Ke Learning Hub</a>
-          </div>
-        </div>
-        <div class="link-grid" id="quick-links"></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <p class="section-kicker">Batch Overview</p>
-            <h2>Status Batch Hari 1–35</h2>
-            <p>Ringkasan cepat untuk melihat coverage jurnal yang sudah masuk repo dan yang masih di-skip.</p>
-          </div>
-        </div>
-        <div class="status-grid">
-          <div class="surface-card">
-            <h3>Sudah masuk repo</h3>
-            <ul id="done-list" class="chip-list"></ul>
-          </div>
-          <div class="surface-card">
-            <h3>Skip</h3>
-            <ul id="skip-list" class="chip-list"></ul>
-          </div>
-        </div>
-      </section>
-
       <section class="panel" id="journals">
         <div class="panel-head split">
           <div>
             <p class="section-kicker">Journal Directory</p>
             <h2>Daftar jurnal</h2>
-            <p>Pakai Reader untuk membaca isi jurnal di website. Pindah ke Learning Hub untuk melihat pelajarannya dalam format yang lebih terstruktur.</p>
+            <p>Buka Reader untuk membaca isi jurnal, atau pindah ke Learning Hub untuk melihat pelajaran utamanya.</p>
           </div>
           <div class="search-wrap">
             <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
           </div>
         </div>
         <div class="section-actions">
-          <a class="btn primary" href="./reader.html">Baca semua via Reader</a>
-          <a class="btn" href="./learn.html">Belajar via Learning Hub</a>
+          <a class="btn primary" href="./reader.html">Buka Reader</a>
+          <a class="btn" href="./learn.html">Buka Learning Hub</a>
         </div>
         <div id="journal-grid" class="journal-grid"></div>
       </section>
@@ -135,7 +70,7 @@
           <div>
             <p class="section-kicker">Journal Builder</p>
             <h2>Buat draft markdown baru</h2>
-            <p>Builder ini menghasilkan format Journal V2 yang lebih siap dibaca Reader dan lebih mudah diproses oleh Learning Hub.</p>
+            <p>Generate format Journal V2 yang lebih siap dipakai di Reader dan Learning Hub.</p>
           </div>
           <div class="inline-actions">
             <a class="btn subtle" href="./learn.html">Lihat tag guide</a>
@@ -194,14 +129,25 @@
               <button type="button" class="btn primary" id="copy-markdown">Copy Markdown</button>
               <button type="button" class="btn" id="download-markdown">Download .md</button>
             </div>
-            <p class="note">Untuk hasil terbaik, isi bagian tag pembelajaran dan pelajaran inti setelah draft selesai agar Learning Hub bisa membaca pola dengan lebih rapi.</p>
+            <p class="note">Setelah generate, rapikan tag pembelajaran dan pelajaran inti agar hasil di Learning Hub lebih akurat.</p>
           </div>
         </div>
+      </section>
+
+      <section class="panel" id="playbook">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Quick Access</p>
+            <h2>File penting</h2>
+            <p>Shortcut cepat ke rule, template, dan review besar.</p>
+          </div>
+        </div>
+        <div class="link-grid" id="quick-links"></div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <div class="site-footer-inner">My Jurnal Trading • sistem pribadi untuk journaling, pembelajaran, dan review trading.</div>
+      <div class="site-footer-inner">My Jurnal Trading • home untuk journaling, pembelajaran, dan review trading.</div>
     </footer>
   </div>
 
