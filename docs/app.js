@@ -1,6 +1,7 @@
 const repoOwner = 'suhaimitoamy';
 const repoName = 'my-jurnal-trading';
 const repoBase = `https://github.com/${repoOwner}/${repoName}`;
+const readerBase = './reader.html';
 
 const doneDays = [1,2,3,5,7,8,9,10,11,12,14,15,16,17,18,19,20,27,28,29,30,31,32,33,34,35];
 const skipDays = [4,6,13,21,22,23,24,25,26];
@@ -52,15 +53,17 @@ function githubBlob(path) {
 function renderStats() {
   const root = document.getElementById('dashboard-stats');
   const cards = [
-    { label: 'Jurnal masuk repo', value: doneDays.length },
-    { label: 'Hari di-skip', value: skipDays.length },
-    { label: 'Quick links', value: quickLinks.length },
-    { label: 'Journal builder', value: 'Ready' }
+    { label: 'Jurnal masuk repo', value: doneDays.length, hint: 'Siap dibuka di reader atau GitHub.' },
+    { label: 'Hari di-skip', value: skipDays.length, hint: 'Tetap tercatat untuk evaluasi batch.' },
+    { label: 'Quick links', value: quickLinks.length, hint: 'Rule penting dalam satu tempat.' },
+    { label: 'Mode baca utama', value: 'Reader', hint: 'Optimalkan review langsung dari HP.' }
   ];
+
   root.innerHTML = cards.map(card => `
     <div class="stat-card">
       <div class="label">${card.label}</div>
       <div class="value">${card.value}</div>
+      <div class="hint">${card.hint}</div>
     </div>
   `).join('');
 }
@@ -75,7 +78,10 @@ function renderQuickLinks() {
   root.innerHTML = quickLinks.map(item => `
     <div class="link-card">
       <a href="${githubBlob(item.path)}" target="_blank" rel="noreferrer">
-        <h3>${item.title}</h3>
+        <div class="card-top">
+          <h3>${item.title}</h3>
+          <span class="card-action">Buka</span>
+        </div>
         <p>${item.desc}</p>
       </a>
     </div>
@@ -96,9 +102,13 @@ function renderJournals(items = journals) {
         <h3>${item.title}</h3>
         <p class="meta">${item.date}</p>
         <div class="tag-row">
+          <span class="tag reader">Reader tersedia</span>
           ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
       </a>
+      <div class="reader-link">
+        <a class="btn" href="${readerBase}#view=${encodeURIComponent(item.path)}">Baca di Reader</a>
+      </div>
     </div>
   `).join('');
 }
@@ -133,7 +143,7 @@ function listToBullets(text) {
 }
 
 function buildMarkdown(formData) {
-  const dateInfo = formatDateParts(formData.date);
+  formatDateParts(formData.date);
   const filename = `${formData.date}-hari-${formData.day}.md`;
   const title = `# Trade Journal - Hari ${formData.day}`;
   const mistakes = listToBullets(formData.mistakes) || '-';

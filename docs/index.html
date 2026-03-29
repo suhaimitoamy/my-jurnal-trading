@@ -4,18 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Jurnal Trading Dashboard</title>
+  <meta name="description" content="Dashboard jurnal trading untuk navigasi cepat, membaca jurnal langsung, dan membuat draft markdown baru." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="hero">
     <div class="hero-inner">
-      <p class="eyebrow">My Jurnal Trading</p>
-      <h1>Dashboard Trading Journal</h1>
-      <p class="subtitle">Website statis untuk membaca jurnal, membuka playbook, melihat status konversi, dan membuat draft markdown jurnal baru.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#journals">Lihat Jurnal</a>
-        <a class="btn" href="#builder">Buat Draft Baru</a>
-        <a class="btn" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
+      <div class="hero-copy">
+        <p class="eyebrow">My Jurnal Trading</p>
+        <h1>Dashboard Trading Journal</h1>
+        <p class="subtitle">Base utama untuk navigasi, review cepat, dan bikin draft jurnal. Untuk baca isi jurnal langsung di website, gunakan Reader.</p>
+      </div>
+
+      <div class="hero-shell">
+        <div class="hero-actions">
+          <a class="btn primary" href="./reader.html">Buka Reader</a>
+          <a class="btn" href="#journals">Lihat Daftar Jurnal</a>
+          <a class="btn" href="#builder">Buat Draft Baru</a>
+          <a class="btn ghost" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
+        </div>
+
+        <section class="feature-spotlight" aria-label="Mode utama website">
+          <article class="mode-card featured">
+            <div class="mode-head">
+              <span class="mode-kicker">Mode utama</span>
+              <span class="mode-chip">Recommended</span>
+            </div>
+            <h2>Reader Jurnal</h2>
+            <p>Baca jurnal langsung di website tanpa bolak-balik ke GitHub. Cocok untuk review harian dari HP.</p>
+            <div class="mode-actions">
+              <a class="btn primary" href="./reader.html">Masuk Reader</a>
+            </div>
+          </article>
+
+          <article class="mode-card">
+            <div class="mode-head">
+              <span class="mode-kicker">Workflow</span>
+            </div>
+            <h2>Dashboard + Builder</h2>
+            <p>Pakai dashboard untuk navigasi cepat, buka playbook penting, cek status batch, dan generate draft markdown baru.</p>
+            <div class="mode-actions">
+              <a class="btn" href="#playbook">Buka Quick Access</a>
+              <a class="btn" href="#builder">Ke Builder</a>
+            </div>
+          </article>
+        </section>
       </div>
     </div>
   </header>
@@ -23,10 +56,22 @@
   <main class="container">
     <section class="stats-grid" id="dashboard-stats"></section>
 
+    <section class="panel" id="playbook">
+      <div class="panel-head">
+        <div>
+          <p class="section-kicker">Quick Access</p>
+          <h2>File penting sekali klik</h2>
+          <p>Buka file inti tanpa cari manual di repo.</p>
+        </div>
+      </div>
+      <div class="link-grid" id="quick-links"></div>
+    </section>
+
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>Status Batch Hari 1-35</h2>
+          <p class="section-kicker">Batch Overview</p>
+          <h2>Status Batch Hari 1–35</h2>
           <p>Yang ada masuk repo. Yang tidak ada di-skip.</p>
         </div>
       </div>
@@ -42,23 +87,19 @@
       </div>
     </section>
 
-    <section class="panel" id="playbook">
-      <div class="panel-head">
-        <div>
-          <h2>Quick Access</h2>
-          <p>Buka file penting tanpa cari manual di repo.</p>
-        </div>
-      </div>
-      <div class="link-grid" id="quick-links"></div>
-    </section>
-
     <section class="panel" id="journals">
       <div class="panel-head split">
         <div>
+          <p class="section-kicker">Journal Directory</p>
           <h2>Daftar Jurnal</h2>
-          <p>Klik kartu untuk buka file markdown di GitHub.</p>
+          <p>Buka reader untuk baca di website, atau buka file asli di GitHub dari tiap kartu.</p>
         </div>
-        <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
+        <div class="search-wrap">
+          <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
+        </div>
+      </div>
+      <div class="section-actions">
+        <a class="btn primary" href="./reader.html">Baca Semua via Reader</a>
       </div>
       <div id="journal-grid" class="journal-grid"></div>
     </section>
@@ -66,7 +107,8 @@
     <section class="panel" id="builder">
       <div class="panel-head">
         <div>
-          <h2>Journal Builder</h2>
+          <p class="section-kicker">Journal Builder</p>
+          <h2>Buat draft markdown baru</h2>
           <p>Isi form ini untuk menghasilkan draft markdown. Draft tersimpan lokal di browser dan bisa langsung di-copy atau di-download.</p>
         </div>
       </div>
@@ -131,14 +173,15 @@
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2>Cara Pakai Singkat</h2>
+          <p class="section-kicker">Flow</p>
+          <h2>Cara pakai singkat</h2>
         </div>
       </div>
       <ol class="howto">
-        <li>Baca rule di bagian Quick Access sebelum trading.</li>
+        <li>Buka Reader untuk membaca jurnal langsung di website.</li>
+        <li>Pakai Quick Access untuk buka rule, checklist, dan playbook penting.</li>
         <li>Gunakan Journal Builder setelah sesi selesai.</li>
-        <li>Copy atau download markdown hasil draft.</li>
-        <li>Masukkan file ke folder <code>trades/</code> di repo GitHub.</li>
+        <li>Copy atau download markdown hasil draft, lalu simpan ke folder <code>trades/</code> di repo GitHub.</li>
       </ol>
     </section>
   </main>
