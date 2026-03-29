@@ -28,7 +28,7 @@
         <section class="hero-card compact utility-first">
           <p class="eyebrow">Reader</p>
           <h1>Baca jurnal dengan cepat</h1>
-          <p class="page-subtitle">Klik hari, baca isi, kembali ke daftar. Di HP, reader sekarang lebih fokus dan tidak terasa turun ke bawah.</p>
+          <p class="page-subtitle">Klik hari, baca isi, lihat screenshot trade, lalu kembali ke daftar. Reader sekarang juga bisa menampilkan galeri gambar per jurnal.</p>
           <div class="hero-actions">
             <a class="btn primary" href="./learn.html">Learning Hub</a>
             <a class="btn" href="./#builder">Builder</a>
@@ -70,6 +70,17 @@
             </div>
           </div>
           <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
+          <section class="gallery-section">
+            <div class="panel-head">
+              <div>
+                <p class="section-kicker">Screenshots</p>
+                <h3>Galeri trade</h3>
+                <p class="gallery-note">Taruh gambar di <code>docs/assets/images/screenshots/hari-xx/</code> agar otomatis muncul di sini.</p>
+              </div>
+            </div>
+            <div id="gallery-status" class="gallery-note">Belum ada screenshot yang dimuat.</div>
+            <div id="gallery-grid" class="gallery-grid"></div>
+          </section>
         </section>
       </section>
     </main>
@@ -90,6 +101,8 @@
     const viewerEl = document.getElementById('viewer');
     const githubEl = document.getElementById('open-github');
     const learnEl = document.getElementById('open-learn');
+    const galleryStatusEl = document.getElementById('gallery-status');
+    const galleryGridEl = document.getElementById('gallery-grid');
     const backBtn = document.getElementById('back-to-list');
     const listTab = document.getElementById('tab-list');
     const viewerTab = document.getElementById('tab-viewer');
@@ -121,6 +134,27 @@
       `).join('');
     }
 
+    function renderGallery(result) {
+      const images = result?.images || [];
+      if (!images.length) {
+        galleryStatusEl.textContent = 'Belum ada screenshot untuk jurnal ini.';
+        galleryGridEl.innerHTML = '';
+        return;
+      }
+      galleryStatusEl.innerHTML = `Folder aktif: <code>${result.folderPath}</code>`;
+      galleryGridEl.innerHTML = images.map(image => `
+        <article class="gallery-card">
+          <a href="${image.rawUrl}" target="_blank" rel="noreferrer">
+            <img class="gallery-image" src="${image.rawUrl}" alt="${image.name}" loading="lazy" />
+          </a>
+          <div class="gallery-meta">
+            <div class="gallery-name">${image.name}</div>
+            <a class="btn" href="${image.githubUrl}" target="_blank" rel="noreferrer">Buka</a>
+          </div>
+        </article>
+      `).join('');
+    }
+
     async function openItem(path, title, date) {
       activePath = path;
       renderList(filterItems(searchEl.value));
@@ -129,13 +163,21 @@
       githubEl.href = site.githubBlob(path);
       learnEl.href = site.learnUrl(path);
       viewerEl.innerHTML = '<p class="loading">Memuat jurnal...</p>';
+      galleryStatusEl.textContent = 'Memuat screenshot...';
+      galleryGridEl.innerHTML = '';
       if (isMobileReader()) setMobileView('viewer');
       try {
-        const markdown = await site.fetchTradeMarkdown(path);
+        const journal = journals.find(item => item.path === path) || { path, title, date };
+        const [markdown, screenshots] = await Promise.all([
+          site.fetchTradeMarkdown(path),
+          site.loadJournalScreenshots(journal)
+        ]);
         viewerEl.innerHTML = site.markdownToHtml(markdown);
+        renderGallery(screenshots);
         history.replaceState({}, '', `#view=${encodeURIComponent(path)}`);
       } catch (error) {
         viewerEl.innerHTML = `<p class="empty">${error.message}</p>`;
+        galleryStatusEl.textContent = 'Screenshot belum tersedia.';
       }
     }
 

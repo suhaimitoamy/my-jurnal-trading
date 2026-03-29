@@ -69,6 +69,10 @@
     return `./learn.html#source=${encodeURIComponent(path)}`;
   }
 
+  function screenshotFolder(day) {
+    return `docs/assets/images/screenshots/hari-${day}`;
+  }
+
   function readCache(key) {
     try {
       const raw = localStorage.getItem(key);
@@ -160,6 +164,37 @@
     const markdown = await fetchText(rawUrl(path));
     writeCache(cacheKey, markdown);
     return markdown;
+  }
+
+  async function loadJournalScreenshots(journal, options = {}) {
+    const day = Number(journal?.day || 0);
+    if (!day) return { folderPath: '', images: [] };
+    const force = Boolean(options.force);
+    const folderPath = screenshotFolder(day);
+    const cacheKey = `my-jurnal-trading:screenshots:${folderPath}`;
+    if (!force) {
+      const cached = readCache(cacheKey);
+      if (cached) return cached;
+    }
+
+    try {
+      const payload = await fetchJson(`${API_BASE}/contents/${folderPath}?ref=${BRANCH}`);
+      const images = (Array.isArray(payload) ? payload : [])
+        .filter(item => item.type === 'file' && /\.(png|jpe?g|webp|gif)$/i.test(item.name))
+        .map(item => ({
+          name: item.name,
+          path: item.path,
+          rawUrl: item.download_url || rawUrl(item.path),
+          githubUrl: item.html_url || githubBlob(item.path)
+        }));
+      const result = { folderPath, images };
+      writeCache(cacheKey, result);
+      return result;
+    } catch (_) {
+      const result = { folderPath, images: [] };
+      writeCache(cacheKey, result, 1000 * 60 * 30);
+      return result;
+    }
   }
 
   function parseFrontmatter(markdown) {
@@ -447,8 +482,10 @@
     rawUrl,
     readerUrl,
     learnUrl,
+    screenshotFolder,
     loadTradeCatalog,
     fetchTradeMarkdown,
+    loadJournalScreenshots,
     loadLearningItems,
     markdownToHtml,
     formatCategoryLabel,
