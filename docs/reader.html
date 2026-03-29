@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Journal Reader - My Jurnal Trading</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#121a31;--panel2:#182241;--text:#eef2ff;--muted:#a9b4d0;--primary:#7c9cff;--border:rgba(255,255,255,.08)}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#0b1020,#0d1327);color:var(--text)}
+    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}.hero{padding:36px 0 18px}.eyebrow{color:#9ac7ff;text-transform:uppercase;letter-spacing:.12em;font-size:12px;margin:0 0 8px}.title{margin:0;font-size:clamp(28px,5vw,46px)}.sub{color:var(--muted);line-height:1.6;max-width:780px}
+    .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}.panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+    .search{width:100%;padding:12px 14px;border-radius:14px;background:var(--panel2);border:1px solid var(--border);color:var(--text);font:inherit}.list{display:grid;gap:12px;margin-top:14px;max-height:75vh;overflow:auto;padding-right:4px}.item{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer}.item:hover{border-color:rgba(124,156,255,.45)}.badge{display:inline-block;padding:6px 9px;border-radius:999px;background:rgba(124,156,255,.16);color:#9ac7ff;font-size:12px;font-weight:700;margin-bottom:8px}.meta{color:var(--muted);font-size:14px}.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.tag{font-size:12px;padding:5px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+    .viewer h1,.viewer h2,.viewer h3{margin:0 0 12px}.viewer h2{margin-top:24px;padding-top:8px;border-top:1px solid var(--border)}.viewer p{line-height:1.75;color:var(--text)}.viewer ul{margin:8px 0 12px 20px}.viewer li{margin:6px 0}.topbar{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.btn{display:inline-block;text-decoration:none;border:1px solid var(--border);padding:10px 14px;border-radius:14px;color:var(--text)}.info{color:var(--muted);margin-top:6px}.empty{color:var(--muted);padding:14px 0}.loading{color:var(--muted)}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.list{max-height:none}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="eyebrow">Level 2 Reader</p>
+      <h1 class="title">Baca jurnal langsung di website</h1>
+      <p class="sub">Versi ini tidak lari ke GitHub saat kamu klik jurnal. Isi markdown dibaca langsung dari repo lalu dirender di halaman ini.</p>
+      <p><a class="btn" href="./">Kembali ke dashboard utama</a></p>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <input id="search" class="search" type="search" placeholder="Cari hari, tag, atau tanggal..." />
+        <div id="list" class="list"></div>
+      </section>
+
+      <section class="panel viewer-panel">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow" id="reader-type">Reader</p>
+            <h2 id="reader-title">Pilih jurnal</h2>
+            <div class="info" id="reader-sub">Klik salah satu jurnal di kiri.</div>
+          </div>
+          <a id="open-github" class="btn" href="#" target="_blank" rel="noreferrer">Buka file di GitHub</a>
+        </div>
+        <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const repoOwner='suhaimitoamy';
+    const repoName='my-jurnal-trading';
+    const repoBase=`https://github.com/${repoOwner}/${repoName}`;
+    const rawBase=`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/`;
+    const journals=[
+      {day:1,date:'2026-01-12',title:'Hari 1',path:'trades/2026-01-12-hari-1.md',tags:['awal','fomo','real account']},
+      {day:2,date:'2026-01-13',title:'Hari 2',path:'trades/2026-01-13-hari-2.md',tags:['loss','emosi','risk']},
+      {day:3,date:'2026-01-14',title:'Hari 3',path:'trades/2026-01-14-hari-3.md',tags:['disiplin','stop trading']},
+      {day:5,date:'2026-01-16',title:'Hari 5',path:'trades/2026-01-16-hari-5.md',tags:['no trade','observasi']},
+      {day:7,date:'2026-01-20',title:'Hari 7',path:'trades/2026-01-20-hari-7.md',tags:['ath','trend','mindset']},
+      {day:8,date:'2026-01-21',title:'Hari 8',path:'trades/2026-01-21-hari-8.md',tags:['btc','overconfidence']},
+      {day:9,date:'2026-01-22',title:'Hari 9',path:'trades/2026-01-22-hari-9.md',tags:['profit','rule break']},
+      {day:10,date:'2026-01-23',title:'Hari 10',path:'trades/2026-01-23-hari-10.md',tags:['pullback','ath']},
+      {day:11,date:'2026-01-26',title:'Hari 11',path:'trades/2026-01-26-hari-11.md',tags:['lot','panic cut']},
+      {day:12,date:'2026-01-27',title:'Hari 12',path:'trades/2026-01-27-hari-12.md',tags:['martingale','revenge']},
+      {day:14,date:'2026-01-29',title:'Hari 14',path:'trades/2026-01-29-hari-14.md',tags:['mc','resistance']},
+      {day:15,date:'2026-01-30',title:'Hari 15',path:'trades/2026-01-30-hari-15.md',tags:['tiktok','rule set']},
+      {day:16,date:'2026-02-02',title:'Hari 16',path:'trades/2026-02-02-hari-16.md',tags:['mc','emosi','unfollow signal']},
+      {day:17,date:'2026-02-03',title:'Hari 17',path:'trades/2026-02-03-hari-17.md',tags:['sl','countertrend']},
+      {day:18,date:'2026-02-04',title:'Hari 18',path:'trades/2026-02-04-hari-18.md',tags:['no trade']},
+      {day:19,date:'2026-02-05',title:'Hari 19',path:'trades/2026-02-05-hari-19.md',tags:['no trade']},
+      {day:20,date:'2026-02-06',title:'Hari 20',path:'trades/2026-02-06-hari-20.md',tags:['breakout','tp kena']},
+      {day:27,date:'2026-02-23',title:'Hari 27',path:'trades/2026-02-23-hari-27.md',tags:['salah lot','tiktok']},
+      {day:28,date:'2026-02-24',title:'Hari 28',path:'trades/2026-02-24-hari-28.md',tags:['bearish','sell limit']},
+      {day:29,date:'2026-02-25',title:'Hari 29',path:'trades/2026-02-25-hari-29.md',tags:['sell loss','structure']},
+      {day:30,date:'2026-03-02',title:'Hari 30',path:'trades/2026-03-02-hari-30.md',tags:['demo','winrate','bias']},
+      {day:31,date:'2026-03-03',title:'Hari 31',path:'trades/2026-03-03-hari-31.md',tags:['bias','no sl']},
+      {day:32,date:'2026-03-11',title:'Hari 32',path:'trades/2026-03-11-hari-32.md',tags:['signal luar','overtrade']},
+      {day:33,date:'2026-03-12',title:'Hari 33',path:'trades/2026-03-12-hari-33.md',tags:['countertrend','risk besar']},
+      {day:34,date:'2026-03-13',title:'Hari 34',path:'trades/2026-03-13-hari-34.md',tags:['sweep','run','structure']},
+      {day:35,date:'2026-03-26',title:'Hari 35',path:'trades/2026-03-26-hari-35.md',tags:['jimmy','tp cepat','emosi']}
+    ];
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;')}
+    function mdToHtml(md){
+      const lines=md.replace(/\r/g,'').split('\n');let html='',inList=false;
+      const close=()=>{if(inList){html+='</ul>';inList=false;}};
+      for(const raw of lines){const t=raw.trim();if(!t){close();continue;} if(t==='---'){close();html+='<hr>';continue;} if(t.startsWith('### ')){close();html+=`<h3>${esc(t.slice(4))}</h3>`;continue;} if(t.startsWith('## ')){close();html+=`<h2>${esc(t.slice(3))}</h2>`;continue;} if(t.startsWith('# ')){close();html+=`<h1>${esc(t.slice(2))}</h1>`;continue;} if(t.startsWith('- ')){if(!inList){html+='<ul>';inList=true;} html+=`<li>${esc(t.slice(2))}</li>`;continue;} close();html+=`<p>${esc(t)}</p>`;} close(); return html;
+    }
+    function renderList(items=journals){
+      const el=document.getElementById('list');
+      el.innerHTML=items.map(j=>`<div class="item" data-path="${j.path}" data-title="${j.title}" data-date="${j.date}"><div class="badge">Hari ${j.day}</div><h3 style="margin:0 0 6px">${j.title}</h3><div class="meta">${j.date}</div><div class="tags">${j.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div>`).join('');
+    }
+    async function openItem(path,title,date){
+      document.getElementById('reader-title').textContent=title;
+      document.getElementById('reader-sub').textContent=date;
+      document.getElementById('open-github').href=`${repoBase}/blob/main/${path}`;
+      const viewer=document.getElementById('viewer');
+      viewer.innerHTML='<p class="loading">Memuat jurnal...</p>';
+      try{const r=await fetch(`${rawBase}${path}`,{cache:'no-store'}); if(!r.ok) throw new Error('Gagal memuat file'); const md=await r.text(); viewer.innerHTML=mdToHtml(md); history.replaceState({},'',`#view=${encodeURIComponent(path)}`);}catch(e){viewer.innerHTML=`<p class="empty">${esc(e.message)}</p>`;}
+    }
+    document.addEventListener('click',(e)=>{const item=e.target.closest('.item'); if(!item) return; openItem(item.dataset.path,item.dataset.title,item.dataset.date);});
+    document.getElementById('search').addEventListener('input',(e)=>{const q=e.target.value.toLowerCase().trim(); if(!q) return renderList(); renderList(journals.filter(j=>[j.title,j.date,`hari ${j.day}`,...j.tags].join(' ').toLowerCase().includes(q)));});
+    renderList();
+    if(location.hash.startsWith('#view=')){const path=decodeURIComponent(location.hash.slice(6)); const match=journals.find(j=>j.path===path); if(match) openItem(match.path,match.title,match.date);}
+  </script>
+</body>
+</html>
