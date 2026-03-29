@@ -15,7 +15,7 @@
     .controls{display:grid;gap:14px}
     .stats-grid{margin-top:0}
     .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-    .learning-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+    .learning-card,.legend-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
     .learning-card:hover{border-color:rgba(124,156,255,.45)}
     .card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
     .card-head h3{margin:0;font-size:20px;line-height:1.35}
@@ -24,6 +24,10 @@
     .filter-chip{border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);padding:10px 14px;border-radius:999px;cursor:pointer;font:inherit;font-weight:700}
     .filter-chip.active{background:rgba(124,156,255,.16);border-color:rgba(124,156,255,.34);color:var(--primary-2)}
     .helper{color:var(--muted);font-size:14px;line-height:1.6}
+    .legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    .legend-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .legend-item h3{margin:10px 0 6px;font-size:16px}
+    .legend-item p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
   </style>
 </head>
 <body>
@@ -51,6 +55,54 @@
       </div>
       <div id="filters" class="filter-row"></div>
       <p class="helper">Semi-otomatis artinya website membaca file di folder <code>trades/</code>. Kalau jurnal baru punya tag dan pelajaran inti, Learning Hub akan menangkapnya lebih akurat.</p>
+    </section>
+
+    <section class="panel legend-card">
+      <div class="panel-head">
+        <div>
+          <p class="section-kicker">Tag Guide</p>
+          <h2>Standar tag resmi</h2>
+          <p>Pakai tag ini saat isi jurnal baru supaya Learning Hub lebih konsisten.</p>
+        </div>
+      </div>
+      <div class="legend-grid">
+        <article class="legend-item">
+          <span class="tag reader">psychology</span>
+          <h3>Psikologi trading</h3>
+          <p>Gunakan untuk FOMO, emosi, revenge trade, panic cut, mental lemah, overconfidence, atau overtrade.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">risk-management</span>
+          <h3>Perlindungan modal</h3>
+          <p>Gunakan untuk lot size, SL, TP, sizing, drawdown, MC, martingale, atau risk yang terlalu besar.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">execution</span>
+          <h3>Eksekusi entry</h3>
+          <p>Gunakan untuk entry asal, trigger belum valid, breakout/retest salah, atau kualitas entry buruk.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">market-structure</span>
+          <h3>Struktur market</h3>
+          <p>Gunakan untuk bias, trend, support, resistance, pullback, sweep, order flow, bullish, atau bearish.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">discipline</span>
+          <h3>Disiplin sistem</h3>
+          <p>Gunakan saat kamu melanggar rule, tidak sabar, tidak tunggu setup, atau keluar dari SOP pribadi.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">external-signal</span>
+          <h3>Pengaruh luar</h3>
+          <p>Gunakan untuk ikut sinyal orang lain, TikTok, grup, mentor, atau opini luar yang mengganggu sistemmu.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag">review</span>
+          <h3>Evaluasi umum</h3>
+          <p>Gunakan jika jurnalmu campuran dan tidak dominan di satu topik tertentu.</p>
+        </article>
+      </div>
+      <p class="helper">Kombinasi yang paling sering berguna: <code>psychology + discipline</code>, <code>risk-management + execution</code>, <code>market-structure + execution</code>.</p>
     </section>
 
     <section class="stats-grid" id="stats"></section>
