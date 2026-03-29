@@ -5,63 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Journal Reader - My Jurnal Trading</title>
   <link rel="stylesheet" href="./styles.css" />
-  <style>
-    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
-    .hero{padding:36px 0 18px}
-    .title{margin:0;font-size:clamp(28px,5vw,46px)}
-    .sub{color:var(--muted);line-height:1.6;max-width:780px}
-    .nav-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
-    .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
-    .reader-list{display:grid;gap:12px;margin-top:14px;max-height:75vh;overflow:auto;padding-right:4px}
-    .item{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:border-color .18s ease,transform .18s ease}
-    .item:hover,.item.active{border-color:rgba(124,156,255,.45);transform:translateY(-1px)}
-    .item h3{margin:0 0 6px}
-    .badge{display:inline-block;padding:6px 9px;border-radius:999px;background:rgba(124,156,255,.16);color:#9ac7ff;font-size:12px;font-weight:700;margin-bottom:8px}
-    .viewer h1,.viewer h2,.viewer h3{margin:0 0 12px}
-    .viewer h2{margin-top:24px;padding-top:8px;border-top:1px solid var(--border)}
-    .viewer p{line-height:1.75;color:var(--text)}
-    .viewer ul{margin:8px 0 12px 20px}
-    .viewer li{margin:6px 0}
-    .topbar{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-    .info{color:var(--muted);margin-top:6px}
-    .empty,.loading{color:var(--muted);padding:14px 0}
-    .viewer-actions{display:flex;flex-wrap:wrap;gap:12px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}.reader-list{max-height:none}}
-  </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <p class="eyebrow">Reader</p>
-      <h1 class="title">Baca jurnal langsung di website</h1>
-      <p class="sub">Reader ini sekarang membaca daftar jurnal dari repo secara semi-otomatis. Kalau kamu upload jurnal baru ke folder <code>trades/</code>, halaman ini akan mencoba menangkapnya tanpa perlu update daftar manual.</p>
-      <div class="nav-actions">
-        <a class="btn" href="./">Kembali ke dashboard</a>
-        <a class="btn" href="./learn.html">Buka Learning Hub</a>
+  <div class="site-shell">
+    <header class="site-topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="./">
+          <span class="brand-title">My Jurnal Trading</span>
+          <span class="brand-subtitle">Dashboard • Reader • Learning Hub</span>
+        </a>
+        <nav class="topnav" aria-label="Navigasi utama">
+          <a class="topnav-link" href="./">Dashboard</a>
+          <a class="topnav-link is-active" href="./reader.html">Reader</a>
+          <a class="topnav-link" href="./learn.html">Learning Hub</a>
+          <a class="topnav-link" href="./#builder">Builder</a>
+        </nav>
       </div>
-    </section>
+    </header>
 
-    <div class="grid">
-      <section class="panel">
-        <input id="search" class="search" type="search" placeholder="Cari hari, tag, atau tanggal..." />
-        <div id="list" class="reader-list"><p class="loading">Memuat daftar jurnal...</p></div>
-      </section>
+    <header class="hero">
+      <div class="hero-inner">
+        <section class="hero-card compact">
+          <p class="eyebrow">Reader</p>
+          <h1>Baca jurnal langsung tanpa pindah ke GitHub</h1>
+          <p class="page-subtitle">Reader sekarang memakai layout yang lebih bersih dan fokus ke kenyamanan baca. Daftar jurnal dibaca dari repo secara semi-otomatis, jadi jurnal baru di folder <code>trades/</code> akan ikut muncul saat katalog berhasil dimuat.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="./learn.html">Buka Learning Hub</a>
+            <a class="btn" href="./#builder">Buka Builder</a>
+          </div>
+        </section>
+      </div>
+    </header>
 
-      <section class="panel viewer-panel">
-        <div class="topbar">
-          <div>
-            <p class="eyebrow">Selected Journal</p>
-            <h2 id="reader-title">Pilih jurnal</h2>
-            <div class="info" id="reader-sub">Klik salah satu jurnal di kiri.</div>
+    <main class="page-wrap">
+      <section class="reader-layout">
+        <section class="panel">
+          <div class="panel-head">
+            <p class="section-kicker">Journal List</p>
+            <h2>Pilih jurnal</h2>
+            <p>Cari berdasarkan hari, tanggal, atau tag.</p>
           </div>
-          <div class="viewer-actions">
-            <a id="open-learn" class="btn" href="./learn.html">Lihat di Learning Hub</a>
-            <a id="open-github" class="btn" href="#" target="_blank" rel="noreferrer">Buka file di GitHub</a>
+          <div class="search-wrap" style="max-width:none;margin-bottom:14px;">
+            <input id="search" class="search" type="search" placeholder="Cari hari, tag, atau tanggal..." />
           </div>
-        </div>
-        <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
+          <div id="list" class="reader-list"><p class="loading">Memuat daftar jurnal...</p></div>
+        </section>
+
+        <section class="panel viewer-panel">
+          <div class="viewer-topbar">
+            <div>
+              <p class="section-kicker">Selected Journal</p>
+              <h2 id="reader-title">Pilih jurnal</h2>
+              <div class="info" id="reader-sub">Klik salah satu jurnal di kiri.</div>
+            </div>
+            <div class="viewer-actions">
+              <a id="open-learn" class="btn subtle" href="./learn.html">Lihat di Learning Hub</a>
+              <a id="open-github" class="btn" href="#" target="_blank" rel="noreferrer">Buka file di GitHub</a>
+            </div>
+          </div>
+          <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
+        </section>
       </section>
-    </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">Reader • fokus untuk membaca jurnal harian langsung dari website.</div>
+    </footer>
   </div>
 
   <script src="./site-utils.js"></script>
@@ -83,12 +92,12 @@
         return;
       }
       listEl.innerHTML = items.map(j => `
-        <div class="item ${j.path === activePath ? 'active' : ''}" data-path="${j.path}" data-title="${j.title}" data-date="${j.date}">
+        <article class="reader-item ${j.path === activePath ? 'is-active' : ''}" data-path="${j.path}" data-title="${j.title}" data-date="${j.date}">
           <div class="badge">Hari ${j.day || '-'}</div>
           <h3>${j.title}</h3>
           <div class="meta">${j.date || '-'}</div>
           <div class="tag-row">${(j.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
-        </div>
+        </article>
       `).join('');
     }
 
@@ -130,7 +139,7 @@
       renderList(journals);
       searchEl.addEventListener('input', () => renderList(filterItems(searchEl.value)));
       listEl.addEventListener('click', event => {
-        const item = event.target.closest('.item');
+        const item = event.target.closest('.reader-item');
         if (!item) return;
         openItem(item.dataset.path, item.dataset.title, item.dataset.date);
       });

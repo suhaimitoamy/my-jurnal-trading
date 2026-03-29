@@ -8,197 +8,202 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="hero-copy">
-        <p class="eyebrow">My Jurnal Trading</p>
-        <h1>Dashboard Trading Journal</h1>
-        <p class="subtitle">Base utama untuk navigasi, review cepat, bikin draft jurnal, baca jurnal langsung, dan mengubah jurnal menjadi materi pembelajaran di Learning Hub.</p>
+  <div class="site-shell">
+    <header class="site-topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="./">
+          <span class="brand-title">My Jurnal Trading</span>
+          <span class="brand-subtitle">Dashboard • Reader • Learning Hub</span>
+        </a>
+        <nav class="topnav" aria-label="Navigasi utama">
+          <a class="topnav-link is-active" href="./">Dashboard</a>
+          <a class="topnav-link" href="./reader.html">Reader</a>
+          <a class="topnav-link" href="./learn.html">Learning Hub</a>
+          <a class="topnav-link" href="#builder">Builder</a>
+        </nav>
       </div>
+    </header>
 
-      <div class="hero-shell">
-        <div class="hero-actions">
-          <a class="btn primary" href="./reader.html">Buka Reader</a>
-          <a class="btn" href="./learn.html">Buka Learning Hub</a>
-          <a class="btn" href="#journals">Lihat Daftar Jurnal</a>
-          <a class="btn" href="#builder">Buat Draft Baru</a>
-          <a class="btn ghost" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
-        </div>
+    <header class="hero">
+      <div class="hero-inner">
+        <section class="hero-card">
+          <p class="eyebrow">Trading Operating System</p>
+          <h1>Dashboard yang rapi untuk baca, belajar, dan membangun jurnal</h1>
+          <p class="subtitle">Sekarang dashboard diarahkan sebagai home utama. Dari sini kamu bisa pindah ke Reader, Learning Hub, atau bikin draft jurnal baru dengan alur yang lebih bersih dan nyaman dipakai dari HP.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="./reader.html">Masuk Reader</a>
+            <a class="btn subtle" href="./learn.html">Buka Learning Hub</a>
+            <a class="btn" href="#builder">Buat Draft Baru</a>
+            <a class="btn ghost" id="repo-link" target="_blank" rel="noreferrer">Buka Repo GitHub</a>
+          </div>
+        </section>
 
-        <section class="feature-spotlight" aria-label="Mode utama website">
+        <section class="quick-overview" aria-label="Ringkasan mode utama">
           <article class="mode-card featured">
             <div class="mode-head">
-              <span class="mode-kicker">Mode utama</span>
+              <span class="mode-kicker">Primary</span>
               <span class="mode-chip">Recommended</span>
             </div>
-            <h2>Reader Jurnal</h2>
-            <p>Baca jurnal langsung di website tanpa bolak-balik ke GitHub. Cocok untuk review harian dari HP.</p>
+            <h3>Reader</h3>
+            <p>Baca jurnal langsung di website dengan fokus ke kenyamanan review harian.</p>
             <div class="mode-actions">
-              <a class="btn primary" href="./reader.html">Masuk Reader</a>
+              <a class="btn primary" href="./reader.html">Buka Reader</a>
             </div>
           </article>
-
           <article class="mode-card">
             <div class="mode-head">
-              <span class="mode-kicker">Belajar</span>
+              <span class="mode-kicker">Learning</span>
             </div>
-            <h2>Learning Hub</h2>
-            <p>Jurnal yang kamu upload bisa ikut tampil sebagai materi pembelajaran. Website mencoba membaca jurnal baru langsung dari repo.</p>
+            <h3>Learning Hub</h3>
+            <p>Ubah jurnal jadi materi pembelajaran dengan filter, prioritas, dan tag guide.</p>
             <div class="mode-actions">
-              <a class="btn" href="./learn.html">Buka Learning Hub</a>
+              <a class="btn" href="./learn.html">Masuk Learning Hub</a>
             </div>
           </article>
-
           <article class="mode-card">
             <div class="mode-head">
-              <span class="mode-kicker">Workflow</span>
+              <span class="mode-kicker">Builder</span>
             </div>
-            <h2>Dashboard + Builder</h2>
-            <p>Pakai dashboard untuk navigasi cepat, buka playbook penting, cek status batch, dan generate draft markdown baru.</p>
+            <h3>Draft Journal V2</h3>
+            <p>Generate jurnal dengan struktur yang lebih siap untuk Reader dan Learning Hub.</p>
             <div class="mode-actions">
-              <a class="btn" href="#playbook">Buka Quick Access</a>
-              <a class="btn" href="#builder">Ke Builder</a>
+              <a class="btn" href="#builder">Buka Builder</a>
             </div>
           </article>
         </section>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="container">
-    <section class="stats-grid" id="dashboard-stats"></section>
+    <main class="container">
+      <section class="stats-grid" id="dashboard-stats"></section>
 
-    <section class="panel" id="playbook">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Quick Access</p>
-          <h2>File penting sekali klik</h2>
-          <p>Buka file inti tanpa cari manual di repo.</p>
-        </div>
-      </div>
-      <div class="link-grid" id="quick-links"></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Batch Overview</p>
-          <h2>Status Batch Hari 1–35</h2>
-          <p>Yang ada masuk repo. Yang tidak ada di-skip.</p>
-        </div>
-      </div>
-      <div class="status-grid">
-        <div>
-          <h3>Sudah masuk repo</h3>
-          <ul id="done-list" class="chip-list"></ul>
-        </div>
-        <div>
-          <h3>Skip</h3>
-          <ul id="skip-list" class="chip-list"></ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" id="journals">
-      <div class="panel-head split">
-        <div>
-          <p class="section-kicker">Journal Directory</p>
-          <h2>Daftar Jurnal</h2>
-          <p>Buka reader untuk baca di website, lalu pakai Learning Hub untuk melihat pelajaran yang diekstrak dari jurnal.</p>
-        </div>
-        <div class="search-wrap">
-          <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
-        </div>
-      </div>
-      <div class="section-actions">
-        <a class="btn primary" href="./reader.html">Baca Semua via Reader</a>
-        <a class="btn" href="./learn.html">Belajar via Learning Hub</a>
-      </div>
-      <div id="journal-grid" class="journal-grid"></div>
-    </section>
-
-    <section class="panel" id="builder">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Journal Builder</p>
-          <h2>Buat draft markdown baru</h2>
-          <p>Isi form ini untuk menghasilkan draft markdown. Draft tersimpan lokal di browser dan bisa langsung di-copy atau di-download.</p>
-        </div>
-      </div>
-      <div class="builder-layout">
-        <form id="journal-form" class="builder-form">
-          <label>
-            Tanggal
-            <input type="date" id="entry-date" required />
-          </label>
-          <label>
-            Hari ke-
-            <input type="number" id="entry-day" min="1" required />
-          </label>
-          <label>
-            Instrumen
-            <input type="text" id="entry-instrument" placeholder="XAUUSD" value="XAUUSD" />
-          </label>
-          <label>
-            Hasil hari ini
-            <input type="text" id="entry-result" placeholder="mis. +80 USC / -125 USC" />
-          </label>
-          <label>
-            Bias / kondisi market
-            <input type="text" id="entry-bias" placeholder="mis. bullish intraday, bearish HTF" />
-          </label>
-          <label>
-            Ringkasan hari
-            <textarea id="entry-summary" rows="5" placeholder="Apa yang terjadi hari ini?"></textarea>
-          </label>
-          <label>
-            Kesalahan utama
-            <textarea id="entry-mistakes" rows="4" placeholder="Tulis poin-poin kesalahan utama"></textarea>
-          </label>
-          <label>
-            Pembelajaran
-            <textarea id="entry-lessons" rows="4" placeholder="Apa pelajaran paling penting?"></textarea>
-          </label>
-          <label>
-            Fokus perbaikan
-            <textarea id="entry-focus" rows="4" placeholder="Apa yang harus diperbaiki besok?"></textarea>
-          </label>
-          <div class="builder-actions">
-            <button type="submit" class="btn primary">Generate Markdown</button>
-            <button type="button" class="btn" id="clear-form">Reset</button>
+      <section class="panel" id="playbook">
+        <div class="panel-head split">
+          <div>
+            <p class="section-kicker">Quick Access</p>
+            <h2>File penting dalam satu tempat</h2>
+            <p>Buka file inti tanpa bolak-balik cari manual di repo.</p>
           </div>
-        </form>
-
-        <div class="builder-output">
-          <div class="output-meta">
-            <strong>Nama file:</strong> <span id="suggested-filename">-</span>
+          <div class="inline-actions">
+            <a class="btn subtle" href="./reader.html">Ke Reader</a>
+            <a class="btn" href="./learn.html">Ke Learning Hub</a>
           </div>
-          <textarea id="markdown-output" rows="24" placeholder="Markdown hasil generate akan muncul di sini..."></textarea>
-          <div class="builder-actions">
-            <button type="button" class="btn primary" id="copy-markdown">Copy Markdown</button>
-            <button type="button" class="btn" id="download-markdown">Download .md</button>
-          </div>
-          <p class="note">Catatan: untuk hasil paling bagus di Learning Hub, nanti kamu bisa tambahkan blok <code>## Tag Pembelajaran</code> dan <code>## Pelajaran Inti</code> di jurnal baru.</p>
         </div>
-      </div>
-    </section>
+        <div class="link-grid" id="quick-links"></div>
+      </section>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Flow</p>
-          <h2>Cara pakai singkat</h2>
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Batch Overview</p>
+            <h2>Status Batch Hari 1–35</h2>
+            <p>Ringkasan cepat untuk melihat coverage jurnal yang sudah masuk repo dan yang masih di-skip.</p>
+          </div>
         </div>
-      </div>
-      <ol class="howto">
-        <li>Buka Reader untuk membaca jurnal langsung di website.</li>
-        <li>Buka Learning Hub untuk melihat materi pembelajaran yang diturunkan dari jurnal.</li>
-        <li>Pakai Quick Access untuk buka rule, checklist, dan playbook penting.</li>
-        <li>Gunakan Journal Builder setelah sesi selesai.</li>
-        <li>Copy atau download markdown hasil draft, lalu simpan ke folder <code>trades/</code> di repo GitHub.</li>
-      </ol>
-    </section>
-  </main>
+        <div class="status-grid">
+          <div class="surface-card">
+            <h3>Sudah masuk repo</h3>
+            <ul id="done-list" class="chip-list"></ul>
+          </div>
+          <div class="surface-card">
+            <h3>Skip</h3>
+            <ul id="skip-list" class="chip-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="journals">
+        <div class="panel-head split">
+          <div>
+            <p class="section-kicker">Journal Directory</p>
+            <h2>Daftar jurnal</h2>
+            <p>Pakai Reader untuk membaca isi jurnal di website. Pindah ke Learning Hub untuk melihat pelajarannya dalam format yang lebih terstruktur.</p>
+          </div>
+          <div class="search-wrap">
+            <input id="journal-search" class="search" type="search" placeholder="Cari hari, tanggal, atau kata kunci..." />
+          </div>
+        </div>
+        <div class="section-actions">
+          <a class="btn primary" href="./reader.html">Baca semua via Reader</a>
+          <a class="btn" href="./learn.html">Belajar via Learning Hub</a>
+        </div>
+        <div id="journal-grid" class="journal-grid"></div>
+      </section>
+
+      <section class="panel" id="builder">
+        <div class="panel-head split">
+          <div>
+            <p class="section-kicker">Journal Builder</p>
+            <h2>Buat draft markdown baru</h2>
+            <p>Builder ini menghasilkan format Journal V2 yang lebih siap dibaca Reader dan lebih mudah diproses oleh Learning Hub.</p>
+          </div>
+          <div class="inline-actions">
+            <a class="btn subtle" href="./learn.html">Lihat tag guide</a>
+          </div>
+        </div>
+        <div class="builder-layout">
+          <form id="journal-form" class="builder-form surface-card">
+            <label>
+              Tanggal
+              <input type="date" id="entry-date" required />
+            </label>
+            <label>
+              Hari ke-
+              <input type="number" id="entry-day" min="1" required />
+            </label>
+            <label>
+              Instrumen
+              <input type="text" id="entry-instrument" placeholder="XAUUSD" value="XAUUSD" />
+            </label>
+            <label>
+              Hasil hari ini
+              <input type="text" id="entry-result" placeholder="mis. +80 USC / -125 USC" />
+            </label>
+            <label>
+              Bias / kondisi market
+              <input type="text" id="entry-bias" placeholder="mis. bullish intraday, bearish HTF" />
+            </label>
+            <label>
+              Ringkasan hari
+              <textarea id="entry-summary" rows="5" placeholder="Apa yang terjadi hari ini?"></textarea>
+            </label>
+            <label>
+              Kesalahan utama
+              <textarea id="entry-mistakes" rows="4" placeholder="Tulis poin-poin kesalahan utama"></textarea>
+            </label>
+            <label>
+              Pembelajaran
+              <textarea id="entry-lessons" rows="4" placeholder="Apa pelajaran paling penting?"></textarea>
+            </label>
+            <label>
+              Fokus perbaikan
+              <textarea id="entry-focus" rows="4" placeholder="Apa yang harus diperbaiki besok?"></textarea>
+            </label>
+            <div class="builder-actions">
+              <button type="submit" class="btn primary">Generate Markdown</button>
+              <button type="button" class="btn" id="clear-form">Reset</button>
+            </div>
+          </form>
+
+          <div class="builder-output surface-card">
+            <div class="output-meta">
+              <strong>Nama file:</strong> <span id="suggested-filename">-</span>
+            </div>
+            <textarea id="markdown-output" rows="24" placeholder="Markdown hasil generate akan muncul di sini..."></textarea>
+            <div class="builder-actions">
+              <button type="button" class="btn primary" id="copy-markdown">Copy Markdown</button>
+              <button type="button" class="btn" id="download-markdown">Download .md</button>
+            </div>
+            <p class="note">Untuk hasil terbaik, isi bagian tag pembelajaran dan pelajaran inti setelah draft selesai agar Learning Hub bisa membaca pola dengan lebih rapi.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">My Jurnal Trading • sistem pribadi untuk journaling, pembelajaran, dan review trading.</div>
+    </footer>
+  </div>
 
   <script src="./app.js"></script>
 </body>

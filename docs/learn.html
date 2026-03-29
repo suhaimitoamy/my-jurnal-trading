@@ -5,150 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Learning Hub - My Jurnal Trading</title>
   <link rel="stylesheet" href="./styles.css" />
-  <style>
-    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 70px}
-    .hero{padding:36px 0 18px}
-    .title{margin:0;font-size:clamp(28px,5vw,46px)}
-    .sub{color:var(--muted);line-height:1.6;max-width:780px}
-    .nav-actions,.filter-row,.card-actions,.stats-row{display:flex;flex-wrap:wrap;gap:12px}
-    .layout{display:grid;grid-template-columns:1fr;gap:18px}
-    .controls{display:grid;gap:14px}
-    .stats-grid{margin-top:0}
-    .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-    .learning-card,.legend-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
-    .learning-card:hover{border-color:rgba(124,156,255,.45)}
-    .card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .card-head h3{margin:0;font-size:20px;line-height:1.35}
-    .source-line{color:var(--muted);font-size:14px}
-    .takeaway-list{margin:0;padding-left:18px;color:var(--text);line-height:1.65}
-    .filter-chip{border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);padding:10px 14px;border-radius:999px;cursor:pointer;font:inherit;font-weight:700}
-    .filter-chip.active{background:rgba(124,156,255,.16);border-color:rgba(124,156,255,.34);color:var(--primary-2)}
-    .helper{color:var(--muted);font-size:14px;line-height:1.6}
-    .legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-    .legend-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:14px}
-    .legend-item h3{margin:10px 0 6px;font-size:16px}
-    .legend-item p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
-    .priority-row{display:flex;flex-wrap:wrap;gap:8px}
-    .tag.priority-urgent{color:#ff9b9b;border-color:rgba(255,155,155,.25);background:rgba(255,155,155,.08)}
-    .tag.priority-repeat{color:#ffcf70;border-color:rgba(255,207,112,.25);background:rgba(255,207,112,.08)}
-    .tag.priority-improved{color:#7fe0b0;border-color:rgba(127,224,176,.25);background:rgba(127,224,176,.08)}
-    .tag.priority-watch{color:#9ac7ff;border-color:rgba(154,199,255,.25);background:rgba(154,199,255,.08)}
-  </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="hero">
-      <p class="eyebrow">Learning Hub</p>
-      <h1 class="title">Materi belajar dari jurnal trading</h1>
-      <p class="sub">Halaman ini membaca jurnal dari repo lalu mencoba mengubahnya menjadi materi pembelajaran. Jurnal lama tetap bisa masuk. Jurnal baru akan lebih bagus hasilnya kalau kamu tambahkan <code>## Tag Pembelajaran</code> dan <code>## Pelajaran Inti</code>.</p>
-      <div class="nav-actions">
-        <a class="btn" href="./">Kembali ke dashboard</a>
-        <a class="btn" href="./reader.html">Buka Reader</a>
+  <div class="site-shell">
+    <header class="site-topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="./">
+          <span class="brand-title">My Jurnal Trading</span>
+          <span class="brand-subtitle">Dashboard • Reader • Learning Hub</span>
+        </a>
+        <nav class="topnav" aria-label="Navigasi utama">
+          <a class="topnav-link" href="./">Dashboard</a>
+          <a class="topnav-link" href="./reader.html">Reader</a>
+          <a class="topnav-link is-active" href="./learn.html">Learning Hub</a>
+          <a class="topnav-link" href="./#builder">Builder</a>
+        </nav>
       </div>
-    </section>
+    </header>
 
-    <section class="panel controls">
-      <div class="panel-head split">
-        <div>
-          <p class="section-kicker">Filter</p>
-          <h2>Temukan pelajaran yang relevan</h2>
-          <p>Cari materi dari jurnal, filter per topik, lalu lompat ke jurnal sumber.</p>
+    <header class="hero">
+      <div class="hero-inner">
+        <section class="hero-card compact">
+          <p class="eyebrow">Learning Hub</p>
+          <h1>Materi belajar yang terasa seperti panel pembinaan</h1>
+          <p class="page-subtitle">Learning Hub menata jurnal menjadi materi yang lebih mudah dibaca, diprioritaskan, dan di-review. Fokus halaman ini sekarang bukan sekadar arsip, tapi pengalaman belajar yang lebih profesional dan nyaman di mobile.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="./reader.html">Buka Reader</a>
+            <a class="btn" href="./#builder">Buka Builder</a>
+          </div>
+        </section>
+      </div>
+    </header>
+
+    <main class="page-wrap">
+      <section class="panel">
+        <div class="panel-head split">
+          <div>
+            <p class="section-kicker">Filter</p>
+            <h2>Temukan pelajaran yang relevan</h2>
+            <p>Cari materi dari jurnal, filter per topik, lalu lompat ke jurnal sumber.</p>
+          </div>
+          <div class="search-wrap">
+            <input id="search" class="search" type="search" placeholder="Cari topik, hari, tag, atau pelajaran..." />
+          </div>
         </div>
-        <div class="search-wrap">
-          <input id="search" class="search" type="search" placeholder="Cari topik, hari, tag, atau pelajaran..." />
+        <div id="filters" class="filter-row"></div>
+        <p class="helper">Kalau jurnal baru punya <code>## Tag Pembelajaran</code> dan <code>## Pelajaran Inti</code>, hasil materi akan jauh lebih rapi.</p>
+      </section>
+
+      <section class="stats-grid" id="stats"></section>
+
+      <section class="panel surface-card">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Guides</p>
+            <h2>Panduan tag dan prioritas</h2>
+            <p>Dua panel ini membantu kamu tagging jurnal dengan konsisten dan tahu jurnal mana yang harus dibaca lebih dulu.</p>
+          </div>
         </div>
-      </div>
-      <div id="filters" class="filter-row"></div>
-      <p class="helper">Semi-otomatis artinya website membaca file di folder <code>trades/</code>. Kalau jurnal baru punya tag dan pelajaran inti, Learning Hub akan menangkapnya lebih akurat.</p>
-    </section>
-
-    <section class="panel legend-card">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Tag Guide</p>
-          <h2>Standar tag resmi</h2>
-          <p>Pakai tag ini saat isi jurnal baru supaya Learning Hub lebih konsisten.</p>
+        <div class="legend-grid" style="margin-bottom:16px;">
+          <article class="legend-item">
+            <span class="tag reader">psychology</span>
+            <h3>Psikologi trading</h3>
+            <p>Untuk FOMO, emosi, revenge trade, panic cut, mental lemah, overconfidence, atau overtrade.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag">risk-management</span>
+            <h3>Perlindungan modal</h3>
+            <p>Untuk lot size, SL, TP, sizing, drawdown, MC, martingale, atau risk terlalu besar.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag">execution</span>
+            <h3>Eksekusi entry</h3>
+            <p>Untuk entry asal, trigger belum valid, breakout salah, atau kualitas eksekusi buruk.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag">market-structure</span>
+            <h3>Struktur market</h3>
+            <p>Untuk bias, trend, support, resistance, pullback, sweep, order flow, bullish, atau bearish.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag">discipline</span>
+            <h3>Disiplin sistem</h3>
+            <p>Untuk rule break, tidak sabar, tidak tunggu setup, atau keluar dari SOP pribadi.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag">external-signal</span>
+            <h3>Pengaruh luar</h3>
+            <p>Untuk ikut sinyal orang lain, TikTok, grup, mentor, atau opini luar yang mengganggu sistem.</p>
+          </article>
         </div>
-      </div>
-      <div class="legend-grid">
-        <article class="legend-item">
-          <span class="tag reader">psychology</span>
-          <h3>Psikologi trading</h3>
-          <p>Gunakan untuk FOMO, emosi, revenge trade, panic cut, mental lemah, overconfidence, atau overtrade.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">risk-management</span>
-          <h3>Perlindungan modal</h3>
-          <p>Gunakan untuk lot size, SL, TP, sizing, drawdown, MC, martingale, atau risk yang terlalu besar.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">execution</span>
-          <h3>Eksekusi entry</h3>
-          <p>Gunakan untuk entry asal, trigger belum valid, breakout/retest salah, atau kualitas entry buruk.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">market-structure</span>
-          <h3>Struktur market</h3>
-          <p>Gunakan untuk bias, trend, support, resistance, pullback, sweep, order flow, bullish, atau bearish.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">discipline</span>
-          <h3>Disiplin sistem</h3>
-          <p>Gunakan saat kamu melanggar rule, tidak sabar, tidak tunggu setup, atau keluar dari SOP pribadi.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">external-signal</span>
-          <h3>Pengaruh luar</h3>
-          <p>Gunakan untuk ikut sinyal orang lain, TikTok, grup, mentor, atau opini luar yang mengganggu sistemmu.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag">review</span>
-          <h3>Evaluasi umum</h3>
-          <p>Gunakan jika jurnalmu campuran dan tidak dominan di satu topik tertentu.</p>
-        </article>
-      </div>
-      <p class="helper">Kombinasi yang paling sering berguna: <code>psychology + discipline</code>, <code>risk-management + execution</code>, <code>market-structure + execution</code>.</p>
-    </section>
-
-    <section class="panel legend-card">
-      <div class="panel-head">
-        <div>
-          <p class="section-kicker">Priority Guide</p>
-          <h2>Status pembinaan</h2>
-          <p>Badge ini membantu kamu tahu jurnal mana yang harus dibaca duluan.</p>
+        <div class="legend-grid">
+          <article class="legend-item">
+            <span class="tag priority-urgent">Wajib diperbaiki</span>
+            <h3>Risiko langsung ke akun</h3>
+            <p>Masalah berat seperti martingale, no SL, emosi besar, atau ikut sinyal luar.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag priority-repeat">Kesalahan berulang</span>
+            <h3>Pola yang masih kambuh</h3>
+            <p>Masalah yang tetap muncul, belum stabil, atau kebiasaan buruk yang berulang.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag priority-improved">Sudah membaik</span>
+            <h3>Ada progres nyata</h3>
+            <p>Disiplin meningkat, no trade yang benar, atau eksekusi lebih sesuai rencana.</p>
+          </article>
+          <article class="legend-item">
+            <span class="tag priority-watch">Perlu dipantau</span>
+            <h3>Belum darurat</h3>
+            <p>Masih penting dipelajari walau belum masuk kategori paling darurat.</p>
+          </article>
         </div>
-      </div>
-      <div class="legend-grid">
-        <article class="legend-item">
-          <span class="tag priority-urgent">Wajib diperbaiki</span>
-          <h3>Risiko langsung ke akun</h3>
-          <p>Muncul saat ada masalah yang berbahaya ke modal atau perilaku yang sangat merusak seperti martingale, no SL, emosi berat, atau ikut sinyal luar.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag priority-repeat">Kesalahan berulang</span>
-          <h3>Pola salah yang masih kambuh</h3>
-          <p>Muncul saat jurnal menunjukkan masalah yang masih berulang, belum stabil, atau kebiasaan buruk yang terus kembali.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag priority-improved">Sudah membaik</span>
-          <h3>Ada progres nyata</h3>
-          <p>Muncul saat isi jurnal menunjukkan disiplin lebih baik, no trade yang benar, atau eksekusi yang lebih sesuai rencana.</p>
-        </article>
-        <article class="legend-item">
-          <span class="tag priority-watch">Perlu dipantau</span>
-          <h3>Belum darurat, tetap diawasi</h3>
-          <p>Muncul untuk materi yang masih penting dipelajari, meski belum masuk kategori paling darurat.</p>
-        </article>
-      </div>
-    </section>
+      </section>
 
-    <section class="stats-grid" id="stats"></section>
+      <section class="learning-grid" id="learning-grid">
+        <article class="learning-card"><p class="loading">Memuat materi pembelajaran...</p></article>
+      </section>
+    </main>
 
-    <section class="layout">
-      <div id="learning-grid" class="learning-grid">
-        <div class="learning-card"><p class="loading">Memuat materi pembelajaran...</p></div>
-      </div>
-    </section>
+    <footer class="site-footer">
+      <div class="site-footer-inner">Learning Hub • mengubah jurnal trading menjadi panel pembelajaran pribadi.</div>
+    </footer>
   </div>
 
   <script src="./site-utils.js"></script>
@@ -177,15 +155,14 @@
     }
 
     function renderStats(items) {
-      const totalTakeaways = items.reduce((sum, item) => sum + (item.takeaways || []).length, 0);
-      const categories = new Set(items.map(item => item.category)).size;
       const latest = items[0]?.day ? `Hari ${items[0].day}` : '-';
       const urgentCount = items.filter(item => (item.priorities || []).includes('urgent')).length;
       const repeatCount = items.filter(item => (item.priorities || []).includes('repeat')).length;
+      const improvedCount = items.filter(item => (item.priorities || []).includes('improved')).length;
       const cards = [
         { label: 'Materi terbaca', value: items.length, hint: 'Diambil dari jurnal di repo.' },
         { label: 'Wajib diperbaiki', value: urgentCount, hint: 'Prioritas baca paling atas.' },
-        { label: 'Kesalahan berulang', value: repeatCount, hint: 'Pola yang masih kambuh.' },
+        { label: 'Sudah membaik', value: improvedCount, hint: 'Area yang mulai menunjukkan progres.' },
         { label: 'Jurnal terbaru', value: latest, hint: 'Terbaca dari katalog repo.' }
       ];
       statsEl.innerHTML = cards.map(card => `
@@ -212,7 +189,7 @@
 
     function renderGrid(items) {
       if (!items.length) {
-        gridEl.innerHTML = '<div class="learning-card"><p class="empty">Tidak ada materi yang cocok dengan filter saat ini.</p></div>';
+        gridEl.innerHTML = '<article class="learning-card"><p class="empty">Tidak ada materi yang cocok dengan filter saat ini.</p></article>';
         return;
       }
       gridEl.innerHTML = items.map(item => `
