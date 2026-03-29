@@ -28,7 +28,7 @@
         <section class="hero-card compact">
           <p class="eyebrow">Reader</p>
           <h1>Baca jurnal langsung tanpa pindah ke GitHub</h1>
-          <p class="page-subtitle">Reader sekarang memakai layout yang lebih bersih dan fokus ke kenyamanan baca. Daftar jurnal dibaca dari repo secara semi-otomatis, jadi jurnal baru di folder <code>trades/</code> akan ikut muncul saat katalog berhasil dimuat.</p>
+          <p class="page-subtitle">Di HP, saat kamu pilih hari, Reader sekarang langsung pindah ke tampilan isi jurnal pada area yang sama. Jadi tidak terasa jatuh ke bawah lagi.</p>
           <div class="hero-actions">
             <a class="btn primary" href="./learn.html">Buka Learning Hub</a>
             <a class="btn" href="./#builder">Buka Builder</a>
@@ -38,12 +38,17 @@
     </header>
 
     <main class="page-wrap">
-      <section class="reader-layout">
-        <section class="panel">
+      <div class="reader-mobile-switch" aria-label="Mode tampilan reader mobile">
+        <button id="tab-list" class="reader-mobile-tab is-active" type="button">Daftar Hari</button>
+        <button id="tab-viewer" class="reader-mobile-tab" type="button">Isi Jurnal</button>
+      </div>
+
+      <section id="reader-layout" class="reader-layout" data-mobile-view="list">
+        <section class="panel reader-sidebar">
           <div class="panel-head">
             <p class="section-kicker">Journal List</p>
-            <h2>Pilih jurnal</h2>
-            <p>Cari berdasarkan hari, tanggal, atau tag.</p>
+            <h2>Pilih hari</h2>
+            <p>Klik hari untuk langsung membuka isi jurnal.</p>
           </div>
           <div class="search-wrap" style="max-width:none;margin-bottom:14px;">
             <input id="search" class="search" type="search" placeholder="Cari hari, tag, atau tanggal..." />
@@ -56,11 +61,12 @@
             <div>
               <p class="section-kicker">Selected Journal</p>
               <h2 id="reader-title">Pilih jurnal</h2>
-              <div class="info" id="reader-sub">Klik salah satu jurnal di kiri.</div>
+              <div class="info" id="reader-sub">Klik salah satu hari untuk mulai membaca.</div>
             </div>
             <div class="viewer-actions">
+              <button id="back-to-list" class="btn subtle" type="button">Kembali ke daftar</button>
               <a id="open-learn" class="btn subtle" href="./learn.html">Lihat di Learning Hub</a>
-              <a id="open-github" class="btn" href="#" target="_blank" rel="noreferrer">Buka file di GitHub</a>
+              <a id="open-github" class="btn" href="#" target="_blank" rel="noreferrer">Buka di GitHub</a>
             </div>
           </div>
           <div id="viewer" class="viewer"><p class="empty">Belum ada jurnal yang dipilih.</p></div>
@@ -76,6 +82,7 @@
   <script src="./site-utils.js"></script>
   <script>
     const site = window.TradingJournalSite;
+    const layoutEl = document.getElementById('reader-layout');
     const listEl = document.getElementById('list');
     const searchEl = document.getElementById('search');
     const titleEl = document.getElementById('reader-title');
@@ -83,8 +90,21 @@
     const viewerEl = document.getElementById('viewer');
     const githubEl = document.getElementById('open-github');
     const learnEl = document.getElementById('open-learn');
+    const backBtn = document.getElementById('back-to-list');
+    const listTab = document.getElementById('tab-list');
+    const viewerTab = document.getElementById('tab-viewer');
     let journals = [];
     let activePath = '';
+
+    function isMobileReader() {
+      return window.innerWidth <= 980;
+    }
+
+    function setMobileView(view) {
+      layoutEl.dataset.mobileView = view;
+      listTab.classList.toggle('is-active', view === 'list');
+      viewerTab.classList.toggle('is-active', view === 'viewer');
+    }
 
     function renderList(items = journals) {
       if (!items.length) {
@@ -109,6 +129,7 @@
       githubEl.href = site.githubBlob(path);
       learnEl.href = site.learnUrl(path);
       viewerEl.innerHTML = '<p class="loading">Memuat jurnal...</p>';
+      if (isMobileReader()) setMobileView('viewer');
       try {
         const markdown = await site.fetchTradeMarkdown(path);
         viewerEl.innerHTML = site.markdownToHtml(markdown);
@@ -137,11 +158,24 @@
       }
       const hashPath = getHashPath();
       renderList(journals);
+      setMobileView(isMobileReader() && hashPath ? 'viewer' : 'list');
       searchEl.addEventListener('input', () => renderList(filterItems(searchEl.value)));
       listEl.addEventListener('click', event => {
         const item = event.target.closest('.reader-item');
         if (!item) return;
         openItem(item.dataset.path, item.dataset.title, item.dataset.date);
+      });
+      backBtn.addEventListener('click', () => setMobileView('list'));
+      listTab.addEventListener('click', () => setMobileView('list'));
+      viewerTab.addEventListener('click', () => setMobileView('viewer'));
+      window.addEventListener('resize', () => {
+        if (!isMobileReader()) {
+          layoutEl.dataset.mobileView = 'list';
+          listTab.classList.remove('is-active');
+          viewerTab.classList.remove('is-active');
+        } else if (!activePath) {
+          setMobileView('list');
+        }
       });
       const initial = journals.find(item => item.path === hashPath) || journals[0];
       if (initial) openItem(initial.path, initial.title, initial.date);
