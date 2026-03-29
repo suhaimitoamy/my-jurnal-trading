@@ -46,6 +46,12 @@
     'external-signal': 'External Signal',
     review: 'Review'
   };
+  const PRIORITY_LABELS = {
+    urgent: 'Wajib diperbaiki',
+    repeat: 'Kesalahan berulang',
+    improved: 'Sudah membaik',
+    watch: 'Perlu dipantau'
+  };
 
   function githubBlob(path) {
     return `${REPO_BASE}/blob/${BRANCH}/${path}`;
@@ -267,6 +273,10 @@
     return CATEGORY_LABELS[tag] || String(tag || 'Review').replace(/-/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
   }
 
+  function formatPriorityLabel(tag) {
+    return PRIORITY_LABELS[tag] || tag;
+  }
+
   function deriveTopic(item, tags, takeaways) {
     if (takeaways[0]) return takeaways[0].slice(0, 88);
     const primary = tags[0] || 'review';
@@ -279,11 +289,25 @@
     return `Pelajaran dari ${item.title}`;
   }
 
+  function derivePriorities(tags, summary, takeaways) {
+    const text = `${summary} ${(takeaways || []).join(' ')}`.toLowerCase();
+    const priorities = [];
+    const hasNegative = ['salah', 'loss', 'stop loss', 'martingale', 'mc', 'emosi', 'fomo', 'asal', 'tidak disiplin', 'ikut sinyal', 'panic', 'overtrade', 'no sl', 'tanpa'].some(keyword => text.includes(keyword));
+    const hasRepeated = ['masih', 'lagi', 'berulang', 'kembali', 'belum stabil', 'masih belum', 'masih mudah'].some(keyword => text.includes(keyword));
+    const hasImproved = ['lebih baik', 'membaik', 'sesuai rencana', 'patuh', 'disiplin', 'no trade', 'menunggu', 'valid'].some(keyword => text.includes(keyword));
+
+    if (hasNegative || tags.includes('risk-management') || tags.includes('external-signal')) priorities.push('urgent');
+    if (hasRepeated || ((tags.includes('psychology') || tags.includes('discipline')) && text.includes('masih'))) priorities.push('repeat');
+    if (hasImproved && !hasNegative) priorities.push('improved');
+    if (!priorities.length || (tags.includes('market-structure') && !hasNegative)) priorities.push('watch');
+    return Array.from(new Set(priorities)).slice(0, 2);
+  }
+
   function buildLearningItem(item, markdown) {
     const frontmatter = parseFrontmatter(markdown);
     const explicitTags = extractBullets(sectionByNames(markdown, ['Tag Pembelajaran'])).map(normalizeTag).filter(Boolean);
     const explicitTakeaways = extractBullets(sectionByNames(markdown, ['Pelajaran Inti', 'Catatan Penting', 'Pembelajaran Hari Ini']));
-    const summarySection = sectionByNames(markdown, ['Kesimpulan', 'Ringkasan Hari Ini', 'Evaluasi Emosi dan Kesalahan']);
+    const summarySection = sectionByNames(markdown, ['Ringkasan Materi', 'Kesimpulan', 'Ringkasan Hari Ini', 'Evaluasi Emosi dan Kesalahan']);
     const summary = firstMeaningfulSentences(summarySection, 2).join(' ');
     const inferredTags = inferTagsFromText(`${markdown}\n${(item.tags || []).join(' ')}`);
     const tags = Array.from(new Set([
@@ -299,6 +323,7 @@
           ...firstMeaningfulSentences(sectionByNames(markdown, ['Pembelajaran Hari Ini']), 2)
         ].filter(Boolean).slice(0, 5);
     const category = tags[0] || 'review';
+    const priorities = derivePriorities(tags, summary || '', takeaways || []);
     return {
       ...item,
       tags,
@@ -307,6 +332,8 @@
       takeaways: takeaways.length ? takeaways : ['Buka jurnal sumber untuk melihat detail pembelajaran lengkap.'],
       category,
       categoryLabel: formatCategoryLabel(category),
+      priorities,
+      priorityLabels: priorities.map(formatPriorityLabel),
       readerUrl: readerUrl(item.path),
       learnUrl: learnUrl(item.path),
       githubUrl: githubBlob(item.path)
@@ -315,7 +342,7 @@
 
   async function loadLearningItems(options = {}) {
     const force = Boolean(options.force);
-    const cacheKey = 'my-jurnal-trading:learning:v2';
+    const cacheKey = 'my-jurnal-trading:learning:v3';
     if (!force) {
       const cached = readCache(cacheKey);
       if (cached) return cached;
@@ -336,6 +363,8 @@
           takeaways: ['Buka jurnal sumber untuk membaca isi lengkapnya.'],
           category: 'review',
           categoryLabel: 'Review',
+          priorities: ['watch'],
+          priorityLabels: ['Perlu dipantau'],
           readerUrl: readerUrl(item.path),
           learnUrl: learnUrl(item.path),
           githubUrl: githubBlob(item.path)
@@ -423,7 +452,9 @@
     loadLearningItems,
     markdownToHtml,
     formatCategoryLabel,
+    formatPriorityLabel,
     categoryLabels: CATEGORY_LABELS,
+    priorityLabels: PRIORITY_LABELS,
     fallbackJournals: FALLBACK_JOURNALS
   };
 })();

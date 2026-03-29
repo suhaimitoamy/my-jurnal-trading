@@ -28,6 +28,11 @@
     .legend-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:14px}
     .legend-item h3{margin:10px 0 6px;font-size:16px}
     .legend-item p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
+    .priority-row{display:flex;flex-wrap:wrap;gap:8px}
+    .tag.priority-urgent{color:#ff9b9b;border-color:rgba(255,155,155,.25);background:rgba(255,155,155,.08)}
+    .tag.priority-repeat{color:#ffcf70;border-color:rgba(255,207,112,.25);background:rgba(255,207,112,.08)}
+    .tag.priority-improved{color:#7fe0b0;border-color:rgba(127,224,176,.25);background:rgba(127,224,176,.08)}
+    .tag.priority-watch{color:#9ac7ff;border-color:rgba(154,199,255,.25);background:rgba(154,199,255,.08)}
   </style>
 </head>
 <body>
@@ -105,6 +110,38 @@
       <p class="helper">Kombinasi yang paling sering berguna: <code>psychology + discipline</code>, <code>risk-management + execution</code>, <code>market-structure + execution</code>.</p>
     </section>
 
+    <section class="panel legend-card">
+      <div class="panel-head">
+        <div>
+          <p class="section-kicker">Priority Guide</p>
+          <h2>Status pembinaan</h2>
+          <p>Badge ini membantu kamu tahu jurnal mana yang harus dibaca duluan.</p>
+        </div>
+      </div>
+      <div class="legend-grid">
+        <article class="legend-item">
+          <span class="tag priority-urgent">Wajib diperbaiki</span>
+          <h3>Risiko langsung ke akun</h3>
+          <p>Muncul saat ada masalah yang berbahaya ke modal atau perilaku yang sangat merusak seperti martingale, no SL, emosi berat, atau ikut sinyal luar.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag priority-repeat">Kesalahan berulang</span>
+          <h3>Pola salah yang masih kambuh</h3>
+          <p>Muncul saat jurnal menunjukkan masalah yang masih berulang, belum stabil, atau kebiasaan buruk yang terus kembali.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag priority-improved">Sudah membaik</span>
+          <h3>Ada progres nyata</h3>
+          <p>Muncul saat isi jurnal menunjukkan disiplin lebih baik, no trade yang benar, atau eksekusi yang lebih sesuai rencana.</p>
+        </article>
+        <article class="legend-item">
+          <span class="tag priority-watch">Perlu dipantau</span>
+          <h3>Belum darurat, tetap diawasi</h3>
+          <p>Muncul untuk materi yang masih penting dipelajari, meski belum masuk kategori paling darurat.</p>
+        </article>
+      </div>
+    </section>
+
     <section class="stats-grid" id="stats"></section>
 
     <section class="layout">
@@ -143,10 +180,12 @@
       const totalTakeaways = items.reduce((sum, item) => sum + (item.takeaways || []).length, 0);
       const categories = new Set(items.map(item => item.category)).size;
       const latest = items[0]?.day ? `Hari ${items[0].day}` : '-';
+      const urgentCount = items.filter(item => (item.priorities || []).includes('urgent')).length;
+      const repeatCount = items.filter(item => (item.priorities || []).includes('repeat')).length;
       const cards = [
         { label: 'Materi terbaca', value: items.length, hint: 'Diambil dari jurnal di repo.' },
-        { label: 'Topik aktif', value: categories, hint: 'Psychology, risk, execution, dan lain-lain.' },
-        { label: 'Takeaways', value: totalTakeaways, hint: 'Poin pelajaran yang berhasil diambil.' },
+        { label: 'Wajib diperbaiki', value: urgentCount, hint: 'Prioritas baca paling atas.' },
+        { label: 'Kesalahan berulang', value: repeatCount, hint: 'Pola yang masih kambuh.' },
         { label: 'Jurnal terbaru', value: latest, hint: 'Terbaca dari katalog repo.' }
       ];
       statsEl.innerHTML = cards.map(card => `
@@ -164,7 +203,7 @@
         const matchesFilter = activeFilter === 'all' || item.category === activeFilter;
         if (!matchesFilter) return false;
         if (!query) return true;
-        return [item.topic, item.summary, item.categoryLabel, item.date, `hari ${item.day || ''}`, ...(item.tags || []), ...(item.takeaways || [])]
+        return [item.topic, item.summary, item.categoryLabel, item.date, `hari ${item.day || ''}`, ...(item.tags || []), ...(item.takeaways || []), ...((item.priorityLabels) || [])]
           .join(' ')
           .toLowerCase()
           .includes(query);
@@ -180,7 +219,10 @@
         <article class="learning-card" id="source-${encodeURIComponent(item.path)}">
           <div class="card-head">
             <div>
-              <span class="tag reader">${item.categoryLabel}</span>
+              <div class="priority-row">
+                ${(item.priorities || []).map(priority => `<span class="tag priority-${priority}">${site.formatPriorityLabel(priority)}</span>`).join('')}
+                <span class="tag reader">${item.categoryLabel}</span>
+              </div>
               <h3>${item.topic}</h3>
             </div>
             <span class="day-badge">Hari ${item.day || '-'}</span>
