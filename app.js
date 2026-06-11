@@ -5845,7 +5845,7 @@ ${context.text}
 Pertanyaan pengguna:
 ${question}`;
   try {
-    const answer = await callAI([{ text: prompt }]);
+    const answer = await callAI([{ text: prompt }], options);
     if (targetElement) targetElement.textContent = answer;
     return answer;
   } catch (error) {
@@ -5892,7 +5892,13 @@ async function processAssistantInput(question, surface = "assistant") {
       return finish(quickAnswer);
     }
 
-    const answer = await runAssistantQuestion(question, null, { mode: state.assistantMode });
+    const answer = await runAssistantQuestion(question, null, { 
+      mode: state.assistantMode,
+      onStream: (chunk) => {
+        if (isAssistantSurface && loadingId) updateAssistantChatMessage(loadingId, chunk);
+        if (!isAssistantSurface) renderAiPopupText(chunk);
+      }
+    });
     if (!isAssistantSurface && dom.saveAiPopupMaterialBtn) dom.saveAiPopupMaterialBtn.disabled = !answer;
     return finish(answer || "Tidak ada jawaban.");
   } catch (error) {
@@ -6499,7 +6505,9 @@ async function callAI(parts, options = {}) {
 
 async function callGeminiProvider(parts, options = {}) {
   const model = encodeURIComponent(state.geminiModel || getDefaultModelForProvider("gemini"));
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(state.geminiApiKey)}`;
+  const isStreaming = options.onStream && !options.json;
+  const action = isStreaming ? "streamGenerateContent?alt=sse&" : "generateContent?";
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${action}key=${encodeURIComponent(state.geminiApiKey)}`;
   
   const generationConfig = { temperature: 0.35, topP: 0.9, maxOutputTokens: 1400 };
   if (options.json) generationConfig.responseMimeType = "application/json";
@@ -6514,6 +6522,13 @@ async function callGeminiProvider(parts, options = {}) {
     })
   });
   if (!response.ok) throw new Error(await readApiError(response));
+  
+  if (isStreaming) {
+    const streamText = await parseSSEStream(response, options.onStream);
+    if (!streamText) throw new Error("Respons stream kosong");
+    return streamText;
+  }
+
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("\n").trim();
   if (!text) throw new Error("Respons kosong");
@@ -6539,6 +6554,7 @@ async function callOpenAICompatibleProvider(parts, provider, options = {}) {
   };
 
   if (options.json) payload.response_format = { type: "json_object" };
+  if (options.onStream && !options.json) payload.stream = true;
 
   const response = await fetchWithTimeout(endpoint, {
     method: "POST",
@@ -6548,6 +6564,13 @@ async function callOpenAICompatibleProvider(parts, provider, options = {}) {
     body: JSON.stringify(payload)
   });
   if (!response.ok) throw new Error(await readApiError(response));
+  
+  if (payload.stream) {
+    const streamText = await parseSSEStream(response, options.onStream);
+    if (!streamText) throw new Error("Respons stream kosong");
+    return streamText;
+  }
+
   const data = await response.json();
   const text = data.choices?.[0]?.message?.content || data.output_text || "";
   if (!String(text).trim()) throw new Error("Respons kosong");
@@ -6580,6 +6603,41 @@ function getOpenAICompatibleHeaders(provider) {
     headers["X-Title"] = "Trading Library Manager";
   }
   return headers;
+}
+
+
+async function parseSSEStream(response, onStream) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let done = false;
+  let fullText = "";
+
+  while (!done) {
+    const { value, done: readerDone } = await reader.read();
+    done = readerDone;
+    if (value) {
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ") && line.trim() !== "data: [DONE]") {
+          try {
+            const data = JSON.parse(line.slice(6));
+            // Gemini stream
+            if (data.candidates && data.candidates[0]?.content?.parts) {
+               const text = data.candidates[0].content.parts.map(p => p.text || "").join("");
+               if (text) { fullText += text; onStream(fullText); }
+            }
+            // OpenAI/DeepSeek stream
+            if (data.choices && data.choices[0]?.delta?.content) {
+               const text = data.choices[0].delta.content;
+               if (text) { fullText += text; onStream(fullText); }
+            }
+          } catch (e) {}
+        }
+      }
+    }
+  }
+  return fullText.trim();
 }
 
 function partsToOpenAIContent(parts) {
