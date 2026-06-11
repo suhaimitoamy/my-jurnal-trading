@@ -12,6 +12,14 @@ const ASSISTANT_SETTINGS_KEY = "tradingLibraryManager.assistantSettings.v1";
 const INSIGHT_CACHE_KEY = "tradingLibraryManager.insightCache.v1";
 const ASSISTANT_CHAT_KEY = "tradingLibraryManager.assistantChat.v2";
 const GITHUB_CONFIG_KEY = "tradingLibraryManager.github.v1";
+const AMY_SYSTEM_PROMPT = `Kamu adalah Amy, seorang mentor trading profesional dari "Amy Trading Academy".
+Karaktermu: Sangat tegas, disiplin, tanpa basa-basi, dan pedas. Jika trader melakukan kesalahan konyol seperti FOMO, revenge trading, overtrade, tidak pakai stop loss, atau melanggar risk management, KAMU BOLEH MEMAKI DAN MARAH KERAS untuk mendisiplinkan mental mereka. 
+Fokus utamamu adalah: Risk Management (Maksimum loss per hari, risk per trade), Trading Psychology (Sabar, disiplin, menerima loss), dan eksekusi yang konsisten berdasarkan Smart Money Concept (SMC) & ICT.
+Kamu tidak menilai trader dari seberapa besar profit mereka, melainkan dari seberapa patuh mereka pada trading plan dan SOP. Jika mereka profit tapi karena melanggar rules (hoki), kamu harus memarahi mereka karena itu kebiasaan buruk. Jika mereka loss tapi sesuai plan, kamu puji kedisiplinan mereka.
+Gunakan bahasa Indonesia yang natural, tegas, seolah-olah kamu sedang berbicara langsung dengan mentee-mu. 
+Silabus akademi yang kamu ajarkan (selalu rujuk ke sini jika perlu belajar lagi):
+1. Pemula Nol, 2. Membaca Chart, 3. Fondasi Market, 4. Liquidity, 5. Smart Money Concept (SMC), 6. ICT Core, 7. Bias & Top Down Analysis, 8. Session & Waktu, 9. Entry Model, 10. XAUUSD Playbook, 11. Advanced ICT, 12. Risk Management, 13. Psikologi Trading, 14. Backtesting & Jurnal, 15. Menjadi Trader Mandiri.
+Selalu suruh mereka baca ulang bagian tertentu jika mereka gagal paham.`;
 const ASSISTANT_MAX_HISTORY = 80;
 const PIN_KEY = "tradingLibraryManager.pinHash.v1";
 const BACKUP_VERSION = "1.0";
@@ -103,6 +111,7 @@ const dom = {
   clearPinBtn: document.querySelector("#clearPinBtn"),
   journalCount: document.querySelector("#journalCount"),
   newJournalBtn: document.querySelector("#newJournalBtn"),
+  weeklyEvalBtn: document.querySelector("#weeklyEvalBtn"),
   journalForm: document.querySelector("#journalForm"),
   journalId: document.querySelector("#journalId"),
   journalDateInput: document.querySelector("#journalDateInput"),
@@ -379,6 +388,7 @@ function bindEvents() {
   dom.setPinBtn?.addEventListener("click", setLocalPin);
   dom.clearPinBtn?.addEventListener("click", clearLocalPin);
   dom.newJournalBtn?.addEventListener("click", () => { resetJournalForm(); openJournalEditor("new"); });
+  dom.weeklyEvalBtn?.addEventListener("click", evaluateWeeklyJournals);
   dom.newNoteBtn?.addEventListener("click", openNoteForm);
   dom.cancelNoteBtn?.addEventListener("click", closeNoteForm);
   dom.noteForm?.addEventListener("submit", saveNote);
@@ -5818,17 +5828,14 @@ async function runAssistantQuestion(question, targetElement, options = {}) {
   refreshInsightCache({ renderPanel: state.view === "assistant" });
   if (targetElement) targetElement.textContent = "Menganalisis dari materi, jurnal, statistik, lalu pengetahuan AI jika perlu...";
   const context = await getRelevantLocalContext(question);
-  const prompt = `Kamu adalah asisten trading pribadi di aplikasi Trading Library Manager. Jawab dalam bahasa Indonesia, ringkas, praktis, dan edukatif. Jangan memberi sinyal pasti buy/sell.
-
-Mode aktif: ${options.mode || state.assistantMode || "coach"}
+  const prompt = `Sebagai Amy, tolong analisis dan jawab pertanyaan berikut.
 
 Aturan sumber dan format jawaban:
 1. Prioritaskan Sumber Lokal dari materi terupload, jurnal, statistik, catatan file, dan insight lokal.
-2. Jika user bertanya konsep trading seperti "apa itu", "jelaskan", atau "maksudnya", jawab definisi dan penjelasan sederhana dulu dalam 3-6 kalimat. Jangan hanya menyuruh user membaca materi.
+2. Jika user bertanya konsep trading, jawab definisi dan penjelasan tegas sesuai SMC/ICT dalam 3-6 kalimat.
 3. Setelah menjawab konsep, jika ada Materi relevan, tampilkan bagian "Materi terkait:" berisi judul materi yang cocok.
-4. Jika Sumber Lokal tidak cukup, boleh jawab memakai pengetahuan umum AI, tetapi tetap praktis dan edukatif.
-5. Jangan menyalin isi materi panjang ke chat. Untuk daftar materi atau isi materi penuh, arahkan aplikasi untuk membuka daftar/viewer.
-6. Di akhir jawaban tulis sumber secara jelas, misalnya "Sumber: materi terupload + pengetahuan AI", "Sumber: materi terupload", "Sumber: jurnal trading", "Sumber: statistik", atau "Sumber: pengetahuan AI, bukan dari materi/jurnal pengguna".
+4. Jangan menyalin isi materi panjang ke chat.
+5. Di akhir jawaban tulis sumber secara jelas, misalnya "Sumber: pengetahuan AI (SMC)", "Sumber: jurnal trading", atau "Sumber: statistik".
 
 Insight kebiasaan lokal:
 ${state.insightCache?.text || "Belum ada insight."}
@@ -5864,8 +5871,9 @@ async function processAssistantInput(question, surface = "assistant") {
     const safeText = text || "Tidak ada jawaban.";
     state.aiPopupLastQuestion = question;
     state.aiPopupLastAnswer = safeText;
-    if (isAssistantSurface && pendingId) updateAssistantChatMessage(pendingId, safeText, extra);
+    if (isAssistantSurface && loadingId) updateAssistantChatMessage(loadingId, safeText, extra);
     if (!isAssistantSurface) renderAiPopupText(safeText);
+    if (isAssistantSurface) state.isAiProcessing = false;
     return safeText;
   };
 
@@ -6401,8 +6409,53 @@ async function askFromJournal(id) {
   const journal = state.journals.find((entry) => entry.id === id);
   if (!journal) return;
   setView("assistant");
-  dom.assistantQuestionInput.value = `Analisis jurnal ini berdasarkan kebiasaan trading saya. Data jurnal lengkap:
-${formatJournalForAI(journal)}`;
+  dom.assistantQuestionInput.value = `Tolong evaluasi jurnal trading saya hari ini dengan jujur dan pedas (sebagai Amy). Apakah saya disiplin atau melanggar SOP? Jika saya melakukan kesalahan bodoh (FOMO, balas dendam, dsb), tolong maki saya agar saya sadar. Data jurnal:\n${formatJournalForAI(journal)}`;
+  await askAssistant();
+}
+
+async function evaluateWeeklyJournals() {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const recentJournals = state.journals.filter((j) => {
+    const d = new Date(j.date || j.createdAt);
+    return d >= sevenDaysAgo && d <= now;
+  });
+
+  if (recentJournals.length === 0) {
+    showToast("Belum ada jurnal dalam 7 hari terakhir.");
+    return;
+  }
+
+  let totalProfit = 0;
+  let totalLoss = 0;
+  let wins = 0;
+  let losses = 0;
+
+  const summaries = recentJournals.map((j) => {
+    const profit = parseTradeAmount(j.profit);
+    const loss = parseTradeAmount(j.loss);
+    totalProfit += profit;
+    totalLoss += loss;
+    if (profit > loss) wins++;
+    else if (loss > profit) losses++;
+    
+    return `- ${j.date}: Setup: ${j.setup || '-'}, Hasil: ${j.result || '-'}, P/L: ${profit - loss}, Kesalahan: ${j.mistakes || '-'}`;
+  }).join("\n");
+
+  const winrate = wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0;
+  const net = totalProfit - totalLoss;
+
+  setView("assistant");
+  dom.assistantQuestionInput.value = `Amy, tolong evaluasi performa trading saya minggu ini secara keseluruhan! Jangan ragu untuk memaki saya jika saya banyak melakukan kesalahan konyol atau net loss karena tidak patuh plan. Ini ringkasannya:
+
+Total Trade: ${recentJournals.length}
+Winrate: ${winrate}%
+Total Profit: ${formatTradeAmount(totalProfit)}
+Total Loss: ${formatTradeAmount(totalLoss)}
+Net PnL: ${formatTradeAmount(net)}
+
+Detail per trade:
+${summaries}`;
   await askAssistant();
 }
 
@@ -6456,6 +6509,7 @@ async function callGeminiProvider(parts, options = {}) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ role: "user", parts }],
+      systemInstruction: { parts: [{ text: AMY_SYSTEM_PROMPT }] },
       generationConfig
     })
   });
@@ -6476,7 +6530,7 @@ async function callOpenAICompatibleProvider(parts, provider, options = {}) {
     messages: [
       {
         role: "system",
-        content: "Kamu adalah asisten jurnal trading pribadi. Jawab dalam bahasa Indonesia, ringkas, praktis, dan edukatif. Jangan memberi sinyal pasti buy/sell."
+        content: AMY_SYSTEM_PROMPT
       },
       { role: "user", content }
     ],
