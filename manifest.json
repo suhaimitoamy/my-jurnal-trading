@@ -1,0 +1,41 @@
+{
+  "id": "./",
+  "name": "Trading Library Manager",
+  "short_name": "Trading Library",
+  "description": "Kelola materi trading, jurnal, media, dokumen, AI, backup dan restore sebagai PWA.",
+  "start_url": "./index.html?v=20260518pwaGithubPages1",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#050806",
+  "theme_color": "#050806",
+  "categories": [
+    "productivity",
+    "education",
+    "finance"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
