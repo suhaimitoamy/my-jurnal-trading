@@ -4299,7 +4299,8 @@ async function clearLocalPin() {
 }
 
 async function enforcePinLock() {
-  const savedHash = localStorage.getItem(PIN_KEY);
+  localStorage.removeItem(PIN_KEY);
+  return;
   if (!savedHash) return;
   document.body.append(makeLockOverlay());
   return new Promise((resolve) => {
