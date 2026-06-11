@@ -5546,8 +5546,12 @@ async function hydrateMaterialContentsForQuery(query = "", options = {}) {
   async function worker() {
     while (cursor < prioritized.length) {
       const item = prioritized[cursor++];
-      const text = await getCachedMaterialContent(item);
-      if (text) item.documentText = text;
+      try {
+        const text = await getCachedMaterialContent(item);
+        if (text) item.documentText = text;
+      } catch (err) {
+        console.warn("Gagal membaca materi:", item.title, err);
+      }
     }
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, prioritized.length) }, worker));
@@ -5576,7 +5580,7 @@ async function getCachedMaterialContent(item) {
       text = record.documentText;
     } else if (record?.blob) {
       const docType = record.documentType || item.documentType || getDocumentType(item);
-      text = await extractDocumentTextFromBlob(record.blob, docType).catch(() => docType === "Word" ? "" : record.blob.text());
+      text = await extractDocumentTextFromBlob(record.blob, docType).catch(() => docType === "Word" ? "" : record.blob.text().catch(() => ""));
       if (text && !record.documentText) await putFileRecord({ ...record, documentText: text }).catch(() => {});
     }
   }
