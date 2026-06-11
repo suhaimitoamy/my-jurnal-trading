@@ -6616,17 +6616,21 @@ async function parseSSEStream(response, onStream) {
   const decoder = new TextDecoder("utf-8");
   let done = false;
   let fullText = "";
+  let buffer = "";
 
   while (!done) {
     const { value, done: readerDone } = await reader.read();
     done = readerDone;
     if (value) {
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split("\n");
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop(); // Keep incomplete line in buffer
+      
       for (const line of lines) {
-        if (line.startsWith("data: ") && line.trim() !== "data: [DONE]") {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("data: ") && trimmed !== "data: [DONE]") {
           try {
-            const data = JSON.parse(line.slice(6));
+            const data = JSON.parse(trimmed.slice(6));
             // Gemini stream
             if (data.candidates && data.candidates[0]?.content?.parts) {
                const text = data.candidates[0].content.parts.map(p => p.text || "").join("");
@@ -6637,7 +6641,9 @@ async function parseSSEStream(response, onStream) {
                const text = data.choices[0].delta.content;
                if (text) { fullText += text; onStream(fullText); }
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("SSE JSON Parse error:", e);
+          }
         }
       }
     }
